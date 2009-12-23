@@ -1,5 +1,5 @@
-Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual Studio 2005
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wowmapview", "wowmapview.vcproj", "{CEC0B8EF-C554-4B6F-B1D5-C1B027E56647}"
 	ProjectSection(ProjectDependencies) = postProject
 		{2A70CBF0-847E-4E3A-B926-542A656DC7FE} = {2A70CBF0-847E-4E3A-B926-542A656DC7FE}
