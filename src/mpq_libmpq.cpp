@@ -181,7 +181,7 @@ MPQArchive::MPQArchive(const char* filename)
 		MPQARCHIVE *ar = (MPQARCHIVE*)(handle);
         succ = true;
 	} else {
-		gLog("Error opening archive %s\n", filename);
+		//gLog("Error opening archive %s\n", filename);
 	}
 }
 

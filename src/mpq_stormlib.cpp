@@ -13,11 +13,11 @@ MPQArchive::MPQArchive(const char* filename)
 {
 	bool result = !!SFileOpenArchive( filename, 0, 0, &mpq_a );
 
-	gLog("Opening %s", filename);
 	if(!result) {
-		gLog("Error opening archive %s", filename);
+		//gLog("Error opening archive %s\n", filename);
 		return;
 	}
+	gLog("Opening archive %s\n", filename);
 	gOpenArchives.push_back( make_pair( filename, &mpq_a ) );
 }
 

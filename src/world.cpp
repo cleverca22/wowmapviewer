@@ -93,6 +93,9 @@ World::~World()
 	gLog("Unloaded world %s\n", basename.c_str());
 }
 
+/*
+http://www.madx.dk/wowdev/wiki/index.php?title=WDT
+*/
 void World::init()
 {
 	char fn[256];
@@ -103,6 +106,8 @@ void World::init()
 	char fourcc[5];
 	size_t size;
 
+	// WDT files specify exactly which map tiles are present in a world, 
+	// if any, and can also reference a "global" WMO. They have a chunked file structure.
 	while (!f.isEof()) {
 		f.read(fourcc,4);
 		f.read(&size, 4);
@@ -114,7 +119,25 @@ void World::init()
 
 		size_t nextpos = f.getPos() + size;
 
-		if (strcmp(fourcc,"MAIN") == 0) {
+		if (strcmp(fourcc,"MPHD") == 0) {
+			// unit32 flags
+			//   0b0001 		No Terrain/no terraincollision. The other flags are ONLY for ADT based maps! See a list here.
+			//   0b0010 		Use vertex shading (ADT.MCNK.MCCV)
+			//   0b0100 		Decides whether to use _env terrain shaders or not: funky and if MCAL has 4096 instead of 2048(?)
+			//   0b1000 		Disables something. No idea what. Another rendering thing. Someone may check all them in wild life..
+			// unit32 something
+			// unit32 unused[6]
+		}
+		else if (strcmp(fourcc,"MAIN") == 0) {
+			// Map tile table. Contains 64x64 = 4096 records of 8 bytes each.
+			// int32 flags
+			//   0b0001			if a tile is holding an ADT
+			//   0b0010			set ingame when an ADT is loaded at that position. The pointer to some data is set if the tile is loaded asynchronous.
+			// AsyncObject *asyncobject
+			// if ( !(MAIN.flags & 2) )
+			//     LoadADTByPosition( x, y );
+			// if ( *(MAIN.asyncobject) )
+			//     AsyncFileReadWait( *(MAIN.asyncobject) );
 			for (int j=0; j<64; j++) {
 				for (int i=0; i<64; i++) {
 					int d;
@@ -132,6 +155,9 @@ void World::init()
 			// global wmo instance data
 			gnWMO = (int)size / 64;
 			// WMOS and WMO-instances are handled below in initWMOs()
+		}
+		else if (strcmp(fourcc,"MWMO") == 0) {
+			// Filename for WMO (world map objects) that appear in this map. A zero-terminated string.
 		}
 		f.seek((int)nextpos);
 	}

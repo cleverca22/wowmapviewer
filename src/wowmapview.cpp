@@ -103,6 +103,15 @@ void getGamePath()
 #endif
 }
 
+int file_exists(char *path)
+{
+	FILE *f = fopen(path, "r");
+	if (f) {
+		fclose(f);
+		return true;
+	}
+	return false;
+}
 
 int main(int argc, char *argv[])
 {
@@ -152,94 +161,65 @@ int main(int argc, char *argv[])
 		else if (!strcmp(argv[i],"-np")) usePatch = false;
 	}
 
-
 	getGamePath();
 
 	gLog(APP_TITLE " " APP_VERSION "\nGame path: %s\n", gamepath);
 
-
 	std::vector<MPQArchive*> archives;
-	const char* archiveNames[] = {"lichking.MPQ", "expansion.MPQ", "common-2.MPQ", "common.MPQ", 
-		"enUS\\lichking-locale-enUS.MPQ", "enUS\\expansion-locale-enUS.MPQ", "enUS\\locale-enUS.MPQ", 
-		"enGB\\lichking-locale-enGB.MPQ", "enGB\\expansion-locale-enGB.MPQ", "enGB\\locale-enGB.MPQ", 
-		"deDE\\lichking-locale-deDE.MPQ", "deDE\\expansion-locale-deDE.MPQ", "deDE\\locale-deDE.MPQ",
-		"frFR\\lichking-locale-frFR.MPQ", "frFR\\expansion-locale-frFR.MPQ", "frFR\\locale-frFR.MPQ",
-		"zhTW\\lichking-locale-zhTW.MPQ", "zhTW\\expansion-locale-zhTW.MPQ", "zhTW\\locale-zhTW.MPQ",
-		"ruRU\\lichking-locale-ruRU.MPQ", "ruRU\\expansion-locale-ruRU.MPQ", "ruRU\\locale-ruRU.MPQ",
-		"esES\\lichking-locale-esES.MPQ", "esES\\expansion-locale-esES.MPQ", "esES\\locale-esES.MPQ",
-		"koKR\\lichking-locale-koKR.MPQ", "koKR\\expansion-locale-koKR.MPQ", "koKR\\locale-koKR.MPQ",
-		"zhCN\\lichking-locale-zhCN.MPQ", "zhTW\\expansion-locale-zhCN.MPQ", "zhTW\\locale-zhCN.MPQ"
-		};
+	
+	int langID = 0;
+
+	char *locales[] = {"enUS", "enGB", "deDE", "frFR", "zhTW", "ruRU", "esES", "koKR", "zhCN"};
 
 	char path[512];
+	for (size_t i=0; i<9; i++) {
+		sprintf(path, "%s%s\\base-%s.MPQ", gamepath, locales[i], locales[i]);
+		if (file_exists(path)) {
+			langID = i;
+			break;
+		}
+	}
+	gLog("Locale: %s\n", locales[langID]);
+	
+	const char* archiveNames[] = {"expansion3.MPQ", "expansion2.MPQ", "lichking.MPQ", "expansion.MPQ", "common-2.MPQ", "common.MPQ"};
 
 	if (usePatch) {
 		// patch goes first -> fake priority handling
+		sprintf(path, "%s%s", gamepath, "patch-3.MPQ");
+		archives.push_back(new MPQArchive(path));
+
 		sprintf(path, "%s%s", gamepath, "patch-2.MPQ");
 		archives.push_back(new MPQArchive(path));
 
 		sprintf(path, "%s%s", gamepath, "patch.MPQ");
 		archives.push_back(new MPQArchive(path));
 
-		sprintf(path, "%s%s", gamepath, "enUS\\Patch-enUS-2.MPQ");
+		sprintf(path, "%s%s\\Patch-%s-2.MPQ", gamepath, locales[langID], locales[langID]);
 		archives.push_back(new MPQArchive(path));
 
-		sprintf(path, "%s%s", gamepath, "enUS\\Patch-enUS.MPQ");
-		archives.push_back(new MPQArchive(path));
-
-		sprintf(path, "%s%s", gamepath, "enGB\\Patch-enGB-2.MPQ");
-		archives.push_back(new MPQArchive(path));
-
-		sprintf(path, "%s%s", gamepath, "enGB\\Patch-enGB.MPQ");
-		archives.push_back(new MPQArchive(path));
-
-		sprintf(path, "%s%s", gamepath, "deDE\\Patch-deDE.MPQ");
-		archives.push_back(new MPQArchive(path));
-
-		sprintf(path, "%s%s", gamepath, "deDE\\Patch-deDE-2.MPQ");
-		archives.push_back(new MPQArchive(path));
-
-		sprintf(path, "%s%s", gamepath, "frFR\\Patch-frFR-2.MPQ");
-		archives.push_back(new MPQArchive(path));
-
-		sprintf(path, "%s%s", gamepath, "frFR\\Patch-frFR.MPQ");
-		archives.push_back(new MPQArchive(path));
-
-		sprintf(path, "%s%s", gamepath, "zhTW\\Patch-zhTW-2.MPQ");
-		archives.push_back(new MPQArchive(path));
-
-		sprintf(path, "%s%s", gamepath, "zhTW\\Patch-zhTW.MPQ");
-		archives.push_back(new MPQArchive(path));
-
-		sprintf(path, "%s%s", gamepath, "ruRU\\Patch-ruRU-2.MPQ");
-		archives.push_back(new MPQArchive(path));
-
-		sprintf(path, "%s%s", gamepath, "ruRU\\Patch-ruRU.MPQ");
-		archives.push_back(new MPQArchive(path));
-
-		sprintf(path, "%s%s", gamepath, "esES\\Patch-esES-2.MPQ");
-		archives.push_back(new MPQArchive(path));
-
-		sprintf(path, "%s%s", gamepath, "esES\\Patch-esES.MPQ");
-		archives.push_back(new MPQArchive(path));
-
-		sprintf(path, "%s%s", gamepath, "koKR\\Patch-koKR-2.MPQ");
-		archives.push_back(new MPQArchive(path));
-
-		sprintf(path, "%s%s", gamepath, "koKR\\Patch-koKR.MPQ");
-		archives.push_back(new MPQArchive(path));
-
-		sprintf(path, "%s%s", gamepath, "zhCN\\Patch-zhCN-2.MPQ");
-		archives.push_back(new MPQArchive(path));
-
-		sprintf(path, "%s%s", gamepath, "zhCN\\Patch-zhCN.MPQ");
+		sprintf(path, "%s%s\\Patch-%s.MPQ", gamepath, locales[langID], locales[langID]);
 		archives.push_back(new MPQArchive(path));
 	}
 
-	for (size_t i=0; i<31; i++) {
+	for (size_t i=0; i<6; i++) {
 		sprintf(path, "%s%s", gamepath, archiveNames[i]);
 		archives.push_back(new MPQArchive(path));
 	}
+
+	sprintf(path, "%s%s\\expansion3-locale-%s.MPQ", gamepath, locales[langID], locales[langID]);
+	archives.push_back(new MPQArchive(path));
+
+	sprintf(path, "%s%s\\expansion2-locale-%s.MPQ", gamepath, locales[langID], locales[langID]);
+	archives.push_back(new MPQArchive(path));
+
+	sprintf(path, "%s%s\\lichking-locale-%s.MPQ", gamepath, locales[langID], locales[langID]);
+	archives.push_back(new MPQArchive(path));
+
+	sprintf(path, "%s%s\\expansion-locale-%s.MPQ", gamepath, locales[langID], locales[langID]);
+	archives.push_back(new MPQArchive(path));
+
+	sprintf(path, "%s%s\\locale-%s.MPQ", gamepath, locales[langID], locales[langID]);
+	archives.push_back(new MPQArchive(path));
 
 	OpenDBs();
 

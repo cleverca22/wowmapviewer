@@ -9,7 +9,7 @@
 
 #define APP_TITLE "WoW Map Viewer"
 
-#define APP_VERSION "v0.6 WIP (Chuanhsing) r90"
+#define APP_VERSION "v0.7 (Chuanhsing) r7"
 
 
 extern std::vector<AppState*> gStates;
