@@ -32,12 +32,14 @@ enum Commands {
 	CMD_LOAD_WORLD,
 	CMD_DO_LOAD_WORLD,
 	CMD_BACK_TO_MENU,
+	CMD_SELECT_MINIMAP
 };
 
 class Menu :public AppState
 {
 
 	int sel,cmd,x,y,cz,cx;
+	int last_key_x, last_key_y, last_key_type;
 
 	World *world;
 

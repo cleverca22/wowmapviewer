@@ -52,7 +52,7 @@ Menu::Menu()
 		y += size;
 
 		if ((y+25) >= video.yres) {
-			x += 160;
+			x += 160; // map name length
 			y = 0;
 		}
 
@@ -248,9 +248,7 @@ void Menu::display(float t, float dt)
 		f32->shprint(video.xres/2 - f32->textwidth(loadstr)/2, video.yres/2-16, loadstr);
 
 		cmd = CMD_DO_LOAD_WORLD;
-	}
-	else if (cmd==CMD_SELECT) {
-
+	} else if (cmd==CMD_SELECT_MINIMAP) {
 		if ((sel != -1) && (world!=0)) {
 
 			if (world->minimap) {
@@ -292,12 +290,16 @@ void Menu::display(float t, float dt)
 			} else {
 				f16->shprint(400, 0, "Select your starting point");
 			}
-		} else {
+		}
+	} else if (cmd==CMD_SELECT) {
+		{
 			// intro text
 			glColor4f(1,1,1,1);
+			/*
 			f32->shprint(300,0,"World of Warcraft map viewer");
 			//f16->print(380,40,"reverse engineered and written by ufoz");
-			f16->shprint(380,40,"http://wowmapview.sourceforge.net");
+			f16->shprint(380,40,"http://code.google.com/p/wowmapviewer/");
+			*/
 
 			f16->shprint(video.xres - 20 - f16->textwidth(APP_VERSION), 10, APP_VERSION);
 			
@@ -320,6 +322,7 @@ void Menu::display(float t, float dt)
 								"B,N - slower/faster time\n"
 			);
 
+			/*
 #ifdef SFMPQAPI
 			f16->shprint(300, video.yres - 40, "World of Warcraft is (C) Blizzard Entertainment\n"
 				"Uses SFmpqapi, (C) ShadowFlare Software"
@@ -332,17 +335,16 @@ void Menu::display(float t, float dt)
 			for (unsigned int i=0; i<bookmarks.size(); i++) {
 				f16->shdrawtext(bookmarks[i].x0, bookmarks[i].y0, bookmarks[i].label.c_str());
 			}
+			*/
 
 		}
 
 		for (unsigned int i=0; i<maps.size(); i++) {
-			if (i==sel) glColor4f(0,1,1,1);
-			else glColor4f(1,1,1,1);
-
-			//f16->print(0, i*16, maps[i].name.c_str());
-
+			if (i==sel)
+				glColor4f(0,1,1,1);
+			else
+				glColor4f(1,1,1,1);
 			maps[i].font->shprint(maps[i].x0, maps[i].y0, maps[i].name.c_str());
-
 		}
 
 		glColor4f(1,1,1,1);
@@ -378,57 +380,80 @@ void Menu::mouseclick(SDL_MouseButtonEvent *e)
 	//unsigned int s = y / 16;
 	//if (s < maps.size()) sel = s;
 
-	if (cmd != 0) 
+	if (cmd != CMD_SELECT && cmd != CMD_SELECT_MINIMAP) 
 		return;
 
-	int osel = sel;
+	//gLog("key press %x, %x\n", e->x, e->y);
+	// key down, key up twice trigger this
+	if (e->x == last_key_x && e->y == last_key_y && e->type != last_key_type) {
+		last_key_type = e->type;
+		return;
+	}
+	last_key_x = e->x;
+	last_key_y = e->y;
+	last_key_type = e->type;
 
-	if ((e->x >= 250) && (e->x < 250+12*64)) {
-		if (sel!=-1 && world !=0 && (e->y<12*64)) {
-			x = e->x - 200;
-			y = e->y;
-			cmd = CMD_LOAD_WORLD;
-		}
-		if (sel==-1) {
-			// bookmarks
-			for (unsigned int i=0; i<bookmarks.size(); i++) {
-				if (bookmarks[i].hit(e->x, e->y)) {
-					cmd = CMD_LOAD_WORLD;
-					setpos = false;
-					// setup camera, ah, av
-					ah = bookmarks[i].ah;
-					av = bookmarks[i].av;
+	if (cmd == CMD_SELECT) {
+		int osel = sel;
 
-					world = new World(bookmarks[i].basename.c_str(), bookmarks[i].mapid);
-					world->camera = bookmarks[i].pos;
+		/*if ((e->x >= 250) && (e->x < 250+12*64)) {
+			if (sel!=-1 && world !=0 && (e->y<12*64)) {
+				x = e->x - 200;
+				y = e->y;
+				cmd = CMD_LOAD_WORLD;
+			}
+			
+			if (sel==-1) {
+				// bookmarks
+				for (unsigned int i=0; i<bookmarks.size(); i++) {
+					if (bookmarks[i].hit(e->x, e->y)) {
+						cmd = CMD_LOAD_WORLD;
+						setpos = false;
+						// setup camera, ah, av
+						ah = bookmarks[i].ah;
+						av = bookmarks[i].av;
 
-					cx = (int) (bookmarks[i].pos.x / TILESIZE);
-					cz = (int) (bookmarks[i].pos.z / TILESIZE);
+						world = new World(bookmarks[i].basename.c_str(), bookmarks[i].mapid);
+						world->camera = bookmarks[i].pos;
 
+						cx = (int) (bookmarks[i].pos.x / TILESIZE);
+						cz = (int) (bookmarks[i].pos.z / TILESIZE);
+
+						break;
+					}
+				}
+			}
+			
+		} else*/ {
+			bool found = false;
+
+			for (unsigned int i=0; i<maps.size(); i++) {
+				if (maps[i].hit(e->x, e->y)) {
+					sel = i;
+					found = true;
 					break;
 				}
 			}
 
-		}
-	} else {
-		bool found = false;
-
-		for (unsigned int i=0; i<maps.size(); i++) {
-			if (maps[i].hit(e->x, e->y)) {
-				sel = i;
-				found = true;
-			}
-		}
-
-		if (found) {
-			if (sel != osel) {
+			if (found) {
+				if (sel != osel) {
+					if (world != 0) delete world;
+					world = new World(maps[sel].name.c_str(), maps[sel].id);
+					cmd = CMD_SELECT_MINIMAP;
+				}
+			} else {
 				if (world != 0) delete world;
-				world = new World(maps[sel].name.c_str(), maps[sel].id);
+				sel = -1;
+				world = 0;
 			}
+		}
+	} else if (cmd == CMD_SELECT_MINIMAP) {
+		if (sel!=-1 && world !=0) {
+			x = e->x - 200;
+			y = e->y;
+			cmd = CMD_LOAD_WORLD;
 		} else {
-			if (world != 0) delete world;
-			sel = -1;
-			world = 0;
+			cmd = CMD_SELECT;
 		}
 	}
 }
@@ -436,6 +461,8 @@ void Menu::mouseclick(SDL_MouseButtonEvent *e)
 
 void Menu::refreshBookmarks()
 {
+	return;
+
 	bookmarks.clear();
     ifstream f("bookmarks.txt");
 	if(!f.is_open())
