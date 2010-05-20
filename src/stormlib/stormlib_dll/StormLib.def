@@ -1,0 +1,63 @@
+;
+; Export file for Windows
+; Copyright (c) 2007 Ladislav Zezula
+; ladik@zezula.net
+;
+
+LIBRARY StormLib.dll
+
+EXPORTS
+
+    SFileSetLocale
+    SFileGetLocale
+    SFileOpenArchive
+    SFileCloseArchive
+
+    SFileCreateAttributes
+    SFileGetAttributes
+    SFileSetAttributes
+    SFileUpdateFileAttributes
+    
+    SFileOpenFileEx
+    SFileCloseFile
+    SFileGetFileSize
+    SFileSetFilePointer
+    SFileReadFile
+    
+    SFileAddListFile
+    
+    SFileCreateArchiveEx
+    
+    SFileAddFileEx
+    SFileAddFile
+    SFileAddWave
+    SFileRemoveFile
+    SFileRenameFile
+    SFileSetFileLocale
+    SFileSetDataCompression
+
+    SFileHasFile
+    SFileGetFileName
+    SFileGetFileInfo
+
+    SFileFindFirstFile
+    SFileFindNextFile
+    SFileFindClose
+
+    SListFileFindFirstFile
+    SListFileFindNextFile
+    SListFileFindClose
+
+    SFileSetCompactCallback
+    SFileCompactArchive
+
+    SFileEnumLocales
+
+    SCompImplode
+    SCompExplode
+    SCompCompress   
+    SCompDecompress 
+
+    SFileVerifyFile
+    SFileVerifyArchive
+    SFileExtractFile

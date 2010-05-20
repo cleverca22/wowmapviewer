@@ -64,7 +64,7 @@
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)/wowmapview.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="SDL/lib"
+				AdditionalLibraryDirectories="lib\Windows\32bit;SDL/lib"
 				IgnoreDefaultLibraryNames="LIBCMT.lib"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/wowmapview.pdb"
@@ -146,7 +146,7 @@
 				AdditionalDependencies="OpenGL32.lib GLu32.lib SDL.lib SDLmain.lib"
 				OutputFile="$(OutDir)/wowmapview.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="SDL\lib"
+				AdditionalLibraryDirectories="lib\Windows\32bit;SDL\lib"
 				IgnoreDefaultLibraryNames="LIBCMT.lib"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -220,7 +220,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\mpq_libmpq.cpp"
+				RelativePath=".\mpq_stormlib.cpp"
 				>
 			</File>
 			<File
@@ -318,7 +318,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\mpq_libmpq.h"
+				RelativePath=".\mpq_stormlib.h"
 				>
 			</File>
 			<File
@@ -367,158 +367,6 @@
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
-		</Filter>
-		<Filter
-			Name="libmpq"
-			>
-			<File
-				RelativePath=".\libmpq\common.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\libmpq\common.h"
-				>
-			</File>
-			<File
-				RelativePath=".\libmpq\explode.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\libmpq\explode.h"
-				>
-			</File>
-			<File
-				RelativePath=".\libmpq\extract.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\libmpq\huffman.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\libmpq\huffman.h"
-				>
-			</File>
-			<File
-				RelativePath=".\libmpq\mpq.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\libmpq\mpq.h"
-				>
-			</File>
-			<File
-				RelativePath=".\libmpq\wave.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\libmpq\wave.h"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="zlib"
-			>
-			<File
-				RelativePath=".\zlib\adler32.c"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\compress.c"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\crc32.c"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\crc32.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\deflate.c"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\deflate.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\gzio.c"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\inffast.c"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\inffast.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\inffixed.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\inflate.c"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\inflate.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\inftrees.c"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\inftrees.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\trees.c"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\trees.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\uncompr.c"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\zconf.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\zlib.h"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\zutil.c"
-				>
-			</File>
-			<File
-				RelativePath=".\zlib\zutil.h"
-				>
-			</File>
 		</Filter>
 	</Files>
 	<Globals>
