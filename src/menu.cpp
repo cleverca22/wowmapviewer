@@ -322,15 +322,14 @@ void Menu::display(float t, float dt)
 								"B,N - slower/faster time\n"
 			);
 
-			/*
 #ifdef SFMPQAPI
 			f16->shprint(300, video.yres - 40, "World of Warcraft is (C) Blizzard Entertainment\n"
 				"Uses SFmpqapi, (C) ShadowFlare Software"
 			);
 #else
-			f16->shprint(300, video.yres - 20, "World of Warcraft is (C) Blizzard Entertainment");
+			f16->shprint(160*3, video.yres - 60, "World of Warcraft map viewer\nhttp://code.google.com/p/wowmapviewer/\nWorld of Warcraft is (C) Blizzard Entertainment");
 #endif
-
+			/*
 			f24->shprint(360, 74, "Bookmarks");
 			for (unsigned int i=0; i<bookmarks.size(); i++) {
 				f16->shdrawtext(bookmarks[i].x0, bookmarks[i].y0, bookmarks[i].label.c_str());
