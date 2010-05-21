@@ -221,10 +221,15 @@ struct MH2O_Information {
 	uint32 ofsHeightmap; // Another offset to data.
 };
 
-MapTile::MapTile(int x0, int z0, char* filename): x(x0), z(z0), topnode(0,0,16), nWMO(0), nMDX(0)
+/*
+MapTile is ADT
+http://madx.dk/wowdev/wiki/index.php?title=ADT
+*/
+MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), topnode(0,0,16), nWMO(0), nMDX(0)
 {
 	xbase = x0 * TILESIZE;
 	zbase = z0 * TILESIZE;
+	mBigAlpha=bigAlpha;
 
 	gLog("Loading tile %d,%d\n",x0,z0);
 
@@ -252,7 +257,7 @@ MapTile::MapTile(int x0, int z0, char* filename): x(x0), z(z0), topnode(0,0,16),
 	char fourcc[5];
 	size_t size;
 
-	size_t mcnk_offsets[256], mcnk_sizes[256];
+	size_t mcnk_offsets[CHUNKS_IN_TILE*CHUNKS_IN_TILE], mcnk_sizes[CHUNKS_IN_TILE*CHUNKS_IN_TILE];
 	memset(mcnk_offsets, 0, sizeof(mcnk_offsets));
 	memset(mcnk_sizes, 0, sizeof(mcnk_sizes));
 
@@ -286,8 +291,8 @@ MapTile::MapTile(int x0, int z0, char* filename): x(x0), z(z0), topnode(0,0,16),
 			};
 			*/
 			// mapchunk offsets/sizes
-			if (size == 256*16) {
-				for (int i=0; i<256; i++) {
+			if (size == CHUNKS_IN_TILE*CHUNKS_IN_TILE*16) {
+				for (int i=0; i<CHUNKS_IN_TILE*CHUNKS_IN_TILE; i++) {
 					f.read(&mcnk_offsets[i], 4);
 					f.read(&mcnk_sizes[i], 4);
 					f.seekRelative(8);
@@ -330,22 +335,20 @@ MapTile::MapTile(int x0, int z0, char* filename): x(x0), z(z0), topnode(0,0,16),
 			*/
 			// models ...
 			// MMID would be relative offsets for MMDX filenames
-			if (size) {
-				char *buf = new char[size+1];
-				f.read(buf, size);
-				buf[size] = 0;
-				char *p=buf;
-				int t=0;
-				while (p<buf+size) {
-					string path(p);
-					p+=strlen(p)+1;
-					fixname(path);
+			char *buf = new char[size+1];
+			f.read(buf, size);
+			buf[size] = 0;
+			char *p=buf;
+			int t=0;
+			while (p<buf+size) {
+				string path(p);
+				p+=strlen(p)+1;
+				fixname(path);
 
-					gWorld->modelmanager.add(path);
-					models.push_back(path);
-				}
-				delete[] buf;
+				gWorld->modelmanager.add(path);
+				models.push_back(path);
 			}
+			delete[] buf;
 		}
 		else if (strncmp(fourcc,"MMID",4)==0) {
 			/*
@@ -359,21 +362,19 @@ MapTile::MapTile(int x0, int z0, char* filename): x(x0), z(z0), topnode(0,0,16),
 			*/
 			// map objects
 			// MWID would be relative offsets for MWMO filenames
-			if (size) {
-				char *buf = new char[size+1];
-				f.read(buf, size);
-				buf[size] = 0;
-				char *p=buf;
-				while (p<buf+size) {
-					string path(p);
-					p+=strlen(p)+1;
-					fixname(path);
+			char *buf = new char[size+1];
+			f.read(buf, size);
+			buf[size] = 0;
+			char *p=buf;
+			while (p<buf+size) {
+				string path(p);
+				p+=strlen(p)+1;
+				fixname(path);
 
-					gWorld->wmomanager.add(path);
-					wmos.push_back(path);
-				}
-				delete[] buf;
+				gWorld->wmomanager.add(path);
+				wmos.push_back(path);
 			}
+			delete[] buf;
 		}
 		else if (strncmp(fourcc,"MWID",4)==0) {
 			/*
@@ -484,7 +485,7 @@ MapTile::MapTile(int x0, int z0, char* filename): x(x0), z(z0), topnode(0,0,16),
 			struct WaterTile *mh2oh;
 			struct WaterLayer *mh2oi;
 
-			for(size_t i=0; i<256;i++)
+			for(size_t i=0; i<CHUNKS_IN_TILE*CHUNKS_IN_TILE;i++)
 			{ // 256*12=3072 bytes
 				//SWaterTile waterTile;
 
@@ -590,7 +591,7 @@ MapTile::MapTile(int x0, int z0, char* filename): x(x0), z(z0), topnode(0,0,16),
 						gLog("Unknown flag combination: %s.\n", filename);
 					}
 
-					chunks[i/16][i%16].waterLayer.push_back( waterLayer );
+					chunks[i/CHUNKS_IN_TILE][i%CHUNKS_IN_TILE].waterLayer.push_back( waterLayer );
 				}
 				printf( "\n");
 				abuf += sizeof(struct WaterTile);
@@ -635,13 +636,13 @@ MapTile::MapTile(int x0, int z0, char* filename): x(x0), z(z0), topnode(0,0,16),
 	}
 
 	// read individual map chunks
-	for (int j=0; j<16; j++) {
-		for (int i=0; i<16; i++) {
-			if (mcnk_offsets[j*16+i] == 0 || mcnk_sizes[j*16+i] == 0) {
+	for (int j=0; j<CHUNKS_IN_TILE; j++) {
+		for (int i=0; i<CHUNKS_IN_TILE; i++) {
+			if (mcnk_offsets[j*CHUNKS_IN_TILE+i] == 0 || mcnk_sizes[j*CHUNKS_IN_TILE+i] == 0) {
 				continue;
 			}
 			f.seek((int)mcnk_offsets[j*16+i]);
-			chunks[j][i].init(this, f);
+			chunks[j][i].init(this, f, mBigAlpha);
 		}
 	}
 
@@ -659,8 +660,8 @@ MapTile::~MapTile()
 
 	topnode.cleanup();
 
-	for (int j=0; j<16; j++) {
-		for (int i=0; i<16; i++) {
+	for (int j=0; j<CHUNKS_IN_TILE; j++) {
+		for (int i=0; i<CHUNKS_IN_TILE; i++) {
 			chunks[j][i].destroy();
 		}
 	}
@@ -683,10 +684,10 @@ void MapTile::draw()
 	if (!ok) return;
 
 
-	for (int j=0; j<16; j++) {
-		for (int i=0; i<16; i++) {
+	for (int j=0; j<CHUNKS_IN_TILE; j++) {
+		for (int i=0; i<CHUNKS_IN_TILE; i++) {
 			chunks[j][i].visible = false;
-			//chunks[j][i].draw();
+			chunks[j][i].draw();
 		}
 	}
 
@@ -698,8 +699,8 @@ void MapTile::drawWater()
 {
 	if (!ok) return;
 
-	for (int j=0; j<16; j++) {
-		for (int i=0; i<16; i++) {
+	for (int j=0; j<CHUNKS_IN_TILE; j++) {
+		for (int i=0; i<CHUNKS_IN_TILE; i++) {
 			if (chunks[j][i].visible) 
 				chunks[j][i].drawWater();
 		}
@@ -766,41 +767,6 @@ After the above mentioned chunks come 256 individual MCNK chunks, row by row, st
 Each map chunk has 9x9 vertices, and in between them 8x8 additional vertices, several texture layers, normal vectors, a shadow map, etc.
 The MCNK header is 128 bytes large.
 */
-struct MapChunkHeader {
-	uint32 flags;
-	uint32 ix;
-	uint32 iy;
-	uint32 nLayers;
-	uint32 nDoodadRefs;
-	uint32 ofsHeight; // MCVT
-	uint32 ofsNormal; // MCNR
-	uint32 ofsLayer; // MCLY
-	uint32 ofsRefs; // MCRF
-	uint32 ofsAlpha; // MCAL
-	uint32 sizeAlpha;
-	uint32 ofsShadow; // MCSH
-	uint32 sizeShadow;
-	uint32 areaid;
-	uint32 nMapObjRefs;
-	uint32 holes;
-	uint16 s1; // UINT2[8][8] ReallyLowQualityTextureingMap;	// the content is the layer being on top, I guess.
-	uint16 s2;
-	uint32 d1;
-	uint32 d2;
-	uint32 d3;
-	uint32 predTex;
-	uint32 nEffectDoodad;
-	uint32 ofsSndEmitters; // MCSE
-	uint32 nSndEmitters; // will be set to 0 in the client if ofsSndEmitters doesn't point to MCSE!
-	uint32 ofsLiquid; // MCLQ
-	uint32 sizeLiquid; // 8 when not used; only read if >8.
-	float  zpos;
-	float  xpos;
-	float  ypos;
-	uint32 textureId; // MCCV, only with flags&0x40, had UINT32 textureId; in ObscuR's structure.
-	uint32 props;
-	uint32 effectId;
-};
 
 enum // 03-29-2005 By ObscuR
 {
@@ -856,7 +822,7 @@ void MapChunk::initTextures(char *basename, int first, int last)
 
 static unsigned char blendbuf[64*64*4]; // make unstable when new/delete, just make it global
 static unsigned char amap[64*64];
-void MapChunk::init(MapTile* mt, MPQFile &f)
+void MapChunk::init(MapTile* mt, MPQFile &f, bool bigAlpha)
 {
 	Vec3D tn[mapbufsize], tv[mapbufsize];
 
@@ -876,10 +842,12 @@ void MapChunk::init(MapTile* mt, MPQFile &f)
 	}
 
 	// okay here we go ^_^
+	mBigAlpha=bigAlpha;
+	
 	size_t lastpos = f.getPos() + size;
 
 	//char header[0x80];
-	MapChunkHeader header;
+	//MapChunkHeader header;
 	f.read(&header, 0x80);
 
 	areaID = header.areaid;
@@ -1112,20 +1080,6 @@ void MapChunk::init(MapTile* mt, MPQFile &f)
 			//gLog("=\n");
 			for (int i=0; i<nTextures; i++) {
 				f.read(&mcly[i], sizeof(struct MCLY));
-				/*
-				int tex, flags, of;
-				f.read(&tex,4);
-				f.read(&flags, 4);
-				f.read(&of, 4);
-
-				if( i > 0 )
-				{
-				ofs[i-1] = of;
-				comp[i-1] = (flags & 0x100) > 0; // Use alpha map
-				comp2[i-1] = (flags & 0x200) > 0; // Alpha map is compressed
-				}
-				f.seekRelative(4);			
-				*/
 
 				if (mcly[i].flags & 0x80) {
 					animated[i] = mcly[i].flags;
@@ -1134,16 +1088,6 @@ void MapChunk::init(MapTile* mt, MPQFile &f)
 				}
 
 				textures[i] = video.textures.get(mt->textures[mcly[i].textureId]);
-			}
-			for(int i=1; i<4; i++) {
-				if ((mcly[i].flags & MCLY_USE_ALPHAMAP) == 0) {
-					comp_sizes[i] = 0;
-					continue;
-				}
-				if (i < 3 && (mcly[i+1].flags & MCLY_USE_ALPHAMAP))
-					comp_sizes[i] = mcly[i+1].offsetInMCAL- mcly[i].offsetInMCAL;
-				else
-					comp_sizes[i] = header.sizeAlpha - mcly[i].offsetInMCAL - 8;
 			}
 		}
 		else if (strncmp(fcc, "MCRF", 4) == 0) {
@@ -1235,7 +1179,8 @@ void MapChunk::init(MapTile* mt, MPQFile &f)
 					glBindTexture(GL_TEXTURE_2D, alphamaps[i-1]);
 
 					unsigned char *abuf = data + mcly[i].offsetInMCAL;
-					if (mcly[i].flags&MCLY_ALPHAMAP_COMPRESS) {
+					if (mcly[i].flags&MCLY_ALPHAMAP_COMPRESS) { // compressed
+						// 21-10-2008 by Flow
 						unsigned int offI = 0; //offset IN buffer
 						unsigned int offO = 0; //offset OUT buffer
 						while( offO < 64*64 )
@@ -1257,22 +1202,37 @@ void MapChunk::init(MapTile* mt, MPQFile &f)
 								offI++;
 						}
 						//f.seekRelative(offI);
+					} else if (mBigAlpha) {
+						unsigned char *p;
+						p = amap;
+						for (int j=0; j<64; j++) {
+							for (int i=0; i<64; i++) {
+								*p++ = *abuf++;
+							}
+
+						}
+						memcpy(amap+63*64,amap+62*64,64);
+						//f.seekRelative(0x1000);
 					} else {
-						if (comp_sizes[i] == 4096) {
-							memcpy(amap, abuf, 4096);
-							//f.seekRelative(64*64);
-						} else {
-							unsigned char *p;
-							p = amap;
-							for (int j=0; j<64; j++) {
-								for(int k=0; k<32; k++) {
-									unsigned char c = *abuf++;
-									*p++ = (c & 0x0f) << 4;
-									*p++ = (c & 0xf0);
+						unsigned char *p;
+						p = amap;
+						for (int j=0; j<64; j++) {
+							for(int k=0; k<32; k++) {
+								unsigned char c = *abuf++;
+								if(i!=31)
+								{
+									*p++ = (unsigned char)((255*((int)(c & 0x0f)))/0x0f);
+									*p++ = (unsigned char)((255*((int)(c & 0xf0)))/0xf0);
+								}
+								else
+								{
+									*p++ = (unsigned char)((255*((int)(c & 0x0f)))/0x0f);
+									*p++ = (unsigned char)((255*((int)(c & 0x0f)))/0x0f);
 								}
 							}
-							//f.seekRelative(64*32);
 						}
+						memcpy(amap+63*64,amap+62*64,64);
+						//f.seekRelative(64*32);
 					}
 					glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap);
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -1930,6 +1890,6 @@ void MapNode::cleanup()
 
 MapChunk *MapTile::getChunk(unsigned int x, unsigned int z)
 {
-	assert(x < 16 && z < 16);
+	assert(x < CHUNKS_IN_TILE && z < CHUNKS_IN_TILE);
 	return &chunks[z][x];
 }

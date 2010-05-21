@@ -41,12 +41,11 @@ Menu::Menu()
 
 		e.x0 = x;
 		e.y0 = y;
-/*
+
 		if (e.id==MAP_AZEROTH || e.id==MAP_KALIMDOR || e.id==MAP_EXPANSION01 || e.id==MAP_NORTHREND) {
 			size = 24;
 			e.font = f24;
 		}
-*/
 
 		e.y1 = e.y0 + size;
 		y += size;

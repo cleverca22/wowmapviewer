@@ -93,6 +93,13 @@ World::~World()
 	gLog("Unloaded world %s\n", basename.c_str());
 }
 
+enum MPHD_Flags{
+	Map_No_Terrain=0x1,
+	Map_Something=0x2,
+	Map_TerrainShaders_BigAlpha=0x4,
+	Map_Disable_Something=0x8
+};
+
 /*
 http://www.madx.dk/wowdev/wiki/index.php?title=WDT
 */
@@ -127,6 +134,10 @@ void World::init()
 			//   0b1000 		Disables something. No idea what. Another rendering thing. Someone may check all them in wild life..
 			// unit32 something
 			// unit32 unused[6]
+			uint32 flags;
+			f.read(&flags, 4);
+			if (flags & Map_TerrainShaders_BigAlpha)
+				mBigAlpha = true;
 		}
 		else if (strcmp(fourcc,"MAIN") == 0) {
 			// Map tile table. Contains 64x64 = 4096 records of 8 bytes each.
@@ -770,7 +781,7 @@ MapTile *World::loadTile(int x, int z)
 	char name[256];
 	sprintf(name,"World\\Maps\\%s\\%s_%d_%d.adt", basename.c_str(), basename.c_str(), x, z);
 
-	maptilecache[firstnull] = new MapTile(x,z,name);
+	maptilecache[firstnull] = new MapTile(x,z,name,mBigAlpha);
 	return maptilecache[firstnull];
 }
 

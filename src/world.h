@@ -18,6 +18,8 @@ class World {
 	MapTile *maptilecache[MAPTILECACHESIZE];
 	MapTile *current[3][3];
 	int ex,ez;
+	
+	bool mBigAlpha;
 
 public:
 

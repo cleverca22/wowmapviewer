@@ -6,6 +6,8 @@
 #define UNITSIZE (CHUNKSIZE / 8.0f)
 #define ZEROPOINT (32.0f * (TILESIZE))
 
+#define	CHUNKS_IN_TILE	16
+
 #include "video.h"
 #include "mpq.h"
 #include "wmo.h"
@@ -22,6 +24,42 @@ class World;
 typedef unsigned char      uint8;
 typedef unsigned short     uint16;
 typedef unsigned int       uint32;
+
+struct MapChunkHeader {
+	uint32 flags;
+	uint32 ix;
+	uint32 iy;
+	uint32 nLayers;
+	uint32 nDoodadRefs;
+	uint32 ofsHeight; // MCVT
+	uint32 ofsNormal; // MCNR
+	uint32 ofsLayer; // MCLY
+	uint32 ofsRefs; // MCRF
+	uint32 ofsAlpha; // MCAL
+	uint32 sizeAlpha;
+	uint32 ofsShadow; // MCSH
+	uint32 sizeShadow;
+	uint32 areaid;
+	uint32 nMapObjRefs;
+	uint32 holes;
+	uint16 s1; // UINT2[8][8] ReallyLowQualityTextureingMap;	// the content is the layer being on top, I guess.
+	uint16 s2;
+	uint32 d1;
+	uint32 d2;
+	uint32 d3;
+	uint32 predTex;
+	uint32 nEffectDoodad;
+	uint32 ofsSndEmitters; // MCSE
+	uint32 nSndEmitters; // will be set to 0 in the client if ofsSndEmitters doesn't point to MCSE!
+	uint32 ofsLiquid; // MCLQ
+	uint32 sizeLiquid; // 8 when not used; only read if >8.
+	float  zpos;
+	float  xpos;
+	float  ypos;
+	uint32 textureId; // MCCV, only with flags&0x40, had UINT32 textureId; in ObscuR's structure.
+	uint32 props;
+	uint32 effectId;
+};
 
 struct SWaterLayer
 {
@@ -77,6 +115,8 @@ public:
 
 	float xbase, ybase, zbase;
 	float r;
+	bool mBigAlpha;
+	MapChunkHeader header;
 
 	unsigned int areaID;
 
@@ -116,7 +156,7 @@ public:
 		}
 	}
 
-	void init(MapTile* mt, MPQFile &f);
+	void init(MapTile* mt, MPQFile &f, bool bigAlpha);
 	void destroy();
 	void initStrip(int holes);
 
@@ -140,6 +180,7 @@ public:
 
 	int x, z;
 	bool ok;
+	bool mBigAlpha;
 
 	//World *world;
 
@@ -149,7 +190,7 @@ public:
 
 	MapNode topnode;
 
-	MapTile(int x0, int z0, char* filename);
+	MapTile(int x0, int z0, char* filename, bool bigAlpha);
 	~MapTile();
 
 	void draw();
