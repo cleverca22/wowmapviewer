@@ -19,7 +19,7 @@ Sky::Sky( DBCFile::Iterator data )
 	pos = Vec3D( data->getFloat( LightDB::PositionX ) / skymul, data->getFloat( LightDB::PositionY ) / skymul, data->getFloat( LightDB::PositionZ ) / skymul );
 	r1 = data->getFloat( LightDB::RadiusInner ) / skymul;
 	r2 = data->getFloat( LightDB::RadiusOuter ) / skymul;
-	gLog( "New sky (%i) at (%f,%f,%f) with (%f > %f).\n", data->getInt( LightDB::ID ), pos.x, pos.y, pos.z, r1, r2 );
+	//gLog( "New sky (%i) at (%f,%f,%f) with (%f > %f).\n", data->getInt( LightDB::ID ), pos.x, pos.y, pos.z, r1, r2 );
 
 	for (int i=0; i<36; i++) 
 		mmin[i] = -2;

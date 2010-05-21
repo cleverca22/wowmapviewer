@@ -715,6 +715,7 @@ void World::enterTile(int x, int z)
 
 	cx = x;
 	cz = z;
+	// Load 3x3 Tiles
 	for (int j=0; j<3; j++) {
 		for (int i=0; i<3; i++) {
 			current[j][i] = loadTile(x-1+i, z-1+j);

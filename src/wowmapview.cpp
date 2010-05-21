@@ -180,8 +180,6 @@ int main(int argc, char *argv[])
 		}
 	}
 	gLog("Locale: %s\n", locales[langID]);
-	
-	const char* archiveNames[] = {"expansion3.MPQ", "expansion2.MPQ", "lichking.MPQ", "expansion.MPQ", "common-2.MPQ", "common.MPQ"};
 
 	if (usePatch) {
 		// patch goes first -> fake priority handling
@@ -201,7 +199,8 @@ int main(int argc, char *argv[])
 		archives.push_back(new MPQArchive(path));
 	}
 
-	for (size_t i=0; i<6; i++) {
+	const char* archiveNames[] = {"expansion3.MPQ", "expansion2.MPQ", "lichking.MPQ", "expansion.MPQ", "common-3.MPQ", "common-2.MPQ", "common.MPQ"};
+	for (size_t i=0; i<7; i++) {
 		sprintf(path, "%s%s", gamepath, archiveNames[i]);
 		archives.push_back(new MPQArchive(path));
 	}
