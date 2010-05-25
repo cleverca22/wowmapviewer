@@ -255,7 +255,7 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 	}
 
 	char fourcc[5];
-	size_t size;
+	unsigned int size;
 
 	size_t mcnk_offsets[CHUNKS_IN_TILE*CHUNKS_IN_TILE], mcnk_sizes[CHUNKS_IN_TILE*CHUNKS_IN_TILE];
 	memset(mcnk_offsets, 0, sizeof(mcnk_offsets));

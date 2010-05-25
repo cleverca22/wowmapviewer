@@ -771,6 +771,9 @@ void WMOGroup::initDisplayList()
 	sprintf(fname,"%s_%03d.wmo",temp, num);
 
 	MPQFile gf(fname);
+	if (gf.isEof()) {
+		return;
+	}
 	gf.seek(0x14); // a header at 0x14
 
 	// read MOGP chunk header
@@ -785,13 +788,14 @@ void WMOGroup::initDisplayList()
 	gf.seek(0x58); // first chunk at 0x58
 
 	char fourcc[5];
-	size_t size;
+	unsigned int size = 0;
 
 	unsigned int *cv;
 	hascv = false;
 
 	while (!gf.isEof()) {
 		gf.read(fourcc,4);
+		size = 0;
 		gf.read(&size, 4);
 		flipcc(fourcc);
 		fourcc[4] = 0;
