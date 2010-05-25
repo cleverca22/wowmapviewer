@@ -1203,7 +1203,7 @@ void MapChunk::init(MapTile* mt, MPQFile &f, bool bigAlpha)
 						}
 						//f.seekRelative(offI);
 					} else if (mBigAlpha) {
-						if (mcly[i].offsetInMCAL + 0x1000 > f.getSize())
+						if (f.getPos() + mcly[i].offsetInMCAL + 0x1000 > f.getSize())
 							continue;
 						unsigned char *p;
 						p = amap;

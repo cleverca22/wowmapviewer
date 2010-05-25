@@ -914,7 +914,7 @@ Offset	Type 		Description
 0x16 	uint8 		0?
 0x17 	uint8 		Texture
 */
-			nBatches = (int)size / 24;
+			nBatches = (unsigned int)size / 24;
 			batches = (WMOBatch*)gf.getPointer();
 			
 			/*
@@ -1058,7 +1058,7 @@ The material ID often refers to what seems to be a "special" material in the roo
 
 	// assume that texturing is on, for unit 1
 
-	for (int b=0; b<nBatches; b++) {
+	for (uint32 b=0; b<nBatches; b++) {
 
 		GLuint list = listbase + b;
 
@@ -1217,7 +1217,7 @@ void WMOGroup::draw(const Vec3D& ofs, const float rot)
 	//glCallList(dl);
 	glDisable(GL_BLEND);
 	glColor4f(1,1,1,1);
-	for (int i=0; i<nBatches; i++) {
+	for (unsigned int i=0; i<nBatches; i++) {
 		bool useshader = (supportShaders && gWorld->useshaders && lists[i].second);
 		if (useshader) wmoShader->bind();
 		glCallList(lists[i].first);

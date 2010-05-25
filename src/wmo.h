@@ -26,7 +26,8 @@ class WMOGroup {
 	float rad;
 	int num;
 	int fog;
-	int nDoodads, nBatches;
+	int nDoodads;
+	unsigned int nBatches;
 	short *ddr;
 	Liquid *lq;
 	std::vector< std::pair<GLuint, int> > lists;
