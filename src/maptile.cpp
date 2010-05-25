@@ -255,13 +255,15 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 	}
 
 	char fourcc[5];
-	unsigned int size;
+	uint32 size;
 
 	size_t mcnk_offsets[CHUNKS_IN_TILE*CHUNKS_IN_TILE], mcnk_sizes[CHUNKS_IN_TILE*CHUNKS_IN_TILE];
 	memset(mcnk_offsets, 0, sizeof(mcnk_offsets));
 	memset(mcnk_sizes, 0, sizeof(mcnk_sizes));
 
 	while (!f.isEof()) {
+		memset(fourcc, 0, 4);
+		size = 0;
 		f.read(fourcc,4);
 		f.read(&size, 4);
 
@@ -827,7 +829,7 @@ void MapChunk::init(MapTile* mt, MPQFile &f, bool bigAlpha)
 	Vec3D tn[mapbufsize], tv[mapbufsize];
 
 	char fcc[5];
-	size_t size;
+	uint32 size;
 
 	size_t mcnk_pos = f.getPos();
 
@@ -920,6 +922,8 @@ void MapChunk::init(MapTile* mt, MPQFile &f, bool bigAlpha)
 	}
 
 	while (f.getPos() < lastpos) {
+		memset(fcc, 0, 4);
+		size = 0;
 		f.read(fcc,4);
 		f.read(&size, 4);
 		flipcc(fcc);

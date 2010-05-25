@@ -41,7 +41,7 @@ WMO::WMO(std::string name): ManagedItem(name), groups(0), nTextures(0), nGroups(
 	gLog("Loading WMO %s\n", name.c_str());
 
 	char fourcc[5];
-	size_t size;
+	uint32 size;
 	float ff[3];
 
 	char *ddnames;
@@ -50,6 +50,8 @@ WMO::WMO(std::string name): ManagedItem(name), groups(0), nTextures(0), nGroups(
 	char *texbuf=0;
 
 	while (!f.isEof()) {
+		memset(fourcc, 0, 4);
+		size = 0;
 		f.read(fourcc,4);
 		f.read(&size, 4);
 		flipcc(fourcc);
@@ -788,14 +790,15 @@ void WMOGroup::initDisplayList()
 	gf.seek(0x58); // first chunk at 0x58
 
 	char fourcc[5];
-	unsigned int size = 0;
+	uint32 size = 0;
 
 	unsigned int *cv;
 	hascv = false;
 
 	while (!gf.isEof()) {
-		gf.read(fourcc,4);
+		memset(fourcc, 0, 4);
 		size = 0;
+		gf.read(fourcc,4);
 		gf.read(&size, 4);
 		flipcc(fourcc);
 		fourcc[4] = 0;
@@ -918,7 +921,7 @@ Offset	Type 		Description
 0x16 	uint8 		0?
 0x17 	uint8 		Texture
 */
-			nBatches = (unsigned int)size / 24;
+			nBatches = (uint32)size / 24;
 			batches = (WMOBatch*)gf.getPointer();
 			
 			/*

@@ -111,11 +111,13 @@ void World::init()
 	MPQFile f(fn);
 
 	char fourcc[5];
-	size_t size;
+	uint32 size;
 
 	// WDT files specify exactly which map tiles are present in a world, 
 	// if any, and can also reference a "global" WMO. They have a chunked file structure.
 	while (!f.isEof()) {
+		memset(fourcc, 0, 4);
+		size = 0;
 		f.read(fourcc,4);
 		f.read(&size, 4);
 		flipcc(fourcc);
@@ -196,9 +198,11 @@ void World::initMinimap()
 	memset(ofsbuf, 0, 64*64*4);
 
 	char fourcc[5];
-	size_t size;
+	uint32 size;
 
 	while (!f.isEof()) {
+		memset(fourcc, 0, 4);
+		size = 0;
 		f.read(fourcc,4);
 		f.read(&size, 4);
 
@@ -383,9 +387,11 @@ void World::initLowresTerrain()
 	memset(ofsbuf, 0, 64*64*4);
 
 	char fourcc[5];
-	size_t size;
+	uint32 size;
 
 	while (!f.isEof()) {
+		memset(fourcc, 0, 4);
+		size = 0;
 		f.read(fourcc,4);
 		f.read(&size, 4);
 
@@ -599,9 +605,11 @@ void World::initWMOs()
 	MPQFile f(fn);
 
 	char fourcc[5];
-	size_t size;
+	uint32 size;
 
 	while (!f.isEof()) {
+		memset(fourcc, 0, 4);
+		size = 0;
 		f.read(fourcc,4);
 		f.read(&size, 4);
 
