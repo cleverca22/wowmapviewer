@@ -263,13 +263,15 @@ struct ModelLightDef {
 };
 
 struct ModelCameraDef {
-	int32 id;
-	float fov, farclip, nearclip;
-	AnimationBlock transPos;
-	Vec3D pos;
-	AnimationBlock transTarget;
-	Vec3D target;
-	AnimationBlock rot;
+	int32 id; // 0 is potrait camera, 1 characterinfo camera; -1 if none; referenced in CamLookup_Table
+	float farclip; // Where it stops to be drawn.
+	float nearclip; // Far and near. Both of them.
+	AnimationBlock transPos; // (Vec3D) How the cameras position moves. Should be 3*3 floats. (? WoW parses 36 bytes = 3*3*sizeof(float))
+	Vec3D pos; // float, Where the camera is located.
+	AnimationBlock transTarget; // (Vec3D) How the target moves. Should be 3*3 floats. (?)
+	Vec3D target; // float, Where the camera points to.
+	AnimationBlock rot; // (Quat) The camera can have some roll-effect. Its 0 to 2*Pi. 3 Floats!
+	AnimationBlock AnimBlock4; // (Float) One Float. cataclysm
 };
 
 struct FakeAnimationBlock {
@@ -313,27 +315,34 @@ struct ModelParticleEmitterDef {
 	int32 nParticleFileName;
 	int32 ofsParticleFileName; // TODO
 	int8 blend;
-	int8 EmitterType;
-	int16 ParticleColor;
-	int8 ParticleType;
-	int8 HeadorTail;
-	int16 TextureTileRotation;
-	int16 cols;
-	int16 rows;
-	AnimationBlock EmissionSpeed; // All of the following blocks should be floats.
-	AnimationBlock SpeedVariation; // Variation in the flying-speed. (range: 0 to 1)
-	AnimationBlock VerticalRange; // Drifting away vertically. (range: 0 to pi)
-	AnimationBlock HorizontalRange; // They can do it horizontally too! (range: 0 to 2*pi)
-	AnimationBlock Gravity; // Fall down, apple!
-	AnimationBlock Lifespan; // Everyone has to die.
+	int8 EmitterType; // EmitterType	 1 - Plane (rectangle), 2 - Sphere, 3 - Spline? (can't be bothered to find one)
+	int16 ParticleColor; // This one is used so you can assign a color to specific particles. They loop over all 
+						 // particles and compare +0x2A to 11, 12 and 13. If that matches, the colors from the dbc get applied.
+	int8 ParticleType; // 0 "normal" particle, 
+					   // 1 large quad from the particle's origin to its position (used in Moonwell water effects)
+					   // 2 seems to be the same as 0 (found some in the Deeprun Tram blinky-lights-sign thing)
+	int8 HeaderTail; // 0 - Head, 1 - Tail, 2 - Both
+	int16 TextureTileRotation; // TODO, Rotation for the texture tile. (Values: -1,0,1)
+	int16 cols; // How many different frames are on that texture? People should learn what rows and cols are.
+	int16 rows; // (2, 2) means slice texture to 2*2 pieces
+	AnimationBlock EmissionSpeed; // (Float) All of the following blocks should be floats.
+	AnimationBlock SpeedVariation; // (Float) Variation in the flying-speed. (range: 0 to 1)
+	AnimationBlock VerticalRange; // (Float) Drifting away vertically. (range: 0 to pi)
+	AnimationBlock HorizontalRange; // (Float) They can do it horizontally too! (range: 0 to 2*pi)
+	AnimationBlock Gravity; // (Float) Fall down, apple!
+	AnimationBlock Lifespan; // (Float) Everyone has to die.
 	int32 unknown;
-	AnimationBlock EmissionRate; // Stread your particles, emitter.
+	AnimationBlock EmissionRate; // (Float) Stread your particles, emitter.
 	int32 unknown2;
-	AnimationBlock EmissionAreaLength; // Well, you can do that in this area.
-	AnimationBlock EmissionAreaWidth;
-	AnimationBlock Gravity2; // A second gravity? Its strong.
+	AnimationBlock EmissionAreaLength; // (Float) Well, you can do that in this area.
+	AnimationBlock EmissionAreaWidth; // (Float) 
+	AnimationBlock Gravity2; // (Float) A second gravity? Its strong.
 	ModelParticleParams p;
-	AnimationBlock en;
+	AnimationBlock en; // (UInt16), seems unused in cataclysm
+	int32 unknown3; // 12319, cataclysm
+	int32 unknown4; // 12319, cataclysm
+	int32 unknown5; // 12319, cataclysm
+	int32 unknown6; // 12319, cataclysm
 };
 
 

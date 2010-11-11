@@ -11,10 +11,9 @@ ArchiveSet gOpenArchives;
 
 MPQArchive::MPQArchive(const char* filename)
 {
-	bool result = !!SFileOpenArchive( filename, 0, 0, &mpq_a );
-
-	if(!result) {
-		//gLog("Error opening archive %s\n", filename);
+	if (!SFileOpenArchive( filename, 0, MPQ_OPEN_READ_ONLY, &mpq_a)) {
+		int nError = GetLastError();
+		gLog("Error opening archive %s, error #: 0x%x\n", filename, nError);
 		return;
 	}
 	gLog("Opening archive %s\n", filename);

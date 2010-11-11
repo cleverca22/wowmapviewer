@@ -894,7 +894,7 @@ void ModelCamera::init(MPQFile &f, ModelCameraDef &mcd, int *global)
 	ok = true;
     nearclip = mcd.nearclip;
 	farclip = mcd.farclip;
-	fov = mcd.fov;
+	//fov = mcd.fov;
 	pos = fixCoordSystem(mcd.pos);
 	target = fixCoordSystem(mcd.target);
 	tPos.init(mcd.transPos, f, global);
