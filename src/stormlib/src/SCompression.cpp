@@ -15,7 +15,7 @@
 #define __STORMLIB_SELF__
 #define __INCLUDE_COMPRESSION__
 #include "StormLib.h"
-#include "SCommon.h"
+#include "StormCommon.h"
 
 //-----------------------------------------------------------------------------
 // Local structures
@@ -543,7 +543,7 @@ static int Decompress_LZMA(char * pbOutBuffer, int * pcbOutBuffer, char * pbInBu
 /*                                                                            */
 /******************************************************************************/
 
-static void Compress_SPARSE(
+void Compress_SPARSE(
     char * pbOutBuffer,
     int * pcbOutBuffer,
     char * pbInBuffer,
@@ -554,7 +554,7 @@ static void Compress_SPARSE(
     CompressSparse((unsigned char *)pbOutBuffer, pcbOutBuffer, (unsigned char *)pbInBuffer, cbInBuffer);
 }
 
-static int Decompress_SPARSE(char * pbOutBuffer, int * pcbOutBuffer, char * pbInBuffer, int cbInBuffer)
+int Decompress_SPARSE(char * pbOutBuffer, int * pcbOutBuffer, char * pbInBuffer, int cbInBuffer)
 {
     return DecompressSparse((unsigned char *)pbOutBuffer, pcbOutBuffer, (unsigned char *)pbInBuffer, cbInBuffer);
 }
@@ -701,8 +701,8 @@ int WINAPI SCompExplode(char * pbOutBuffer, int * pcbOutBuffer, char * pbInBuffe
     // Perform decompression
     if(!Decompress_PKLIB(pbOutBuffer, &cbOutBuffer, pbInBuffer, cbInBuffer))
     {
-        SetLastError(ERROR_GEN_FAILURE);
-        return FALSE;
+        SetLastError(ERROR_FILE_CORRUPT);
+        return false;
     }
 
     *pcbOutBuffer = cbOutBuffer;
@@ -767,7 +767,7 @@ int WINAPI SCompCompress(
     if(cbInBuffer == 0)
     {
         *pcbOutBuffer = 0;
-        return TRUE;
+        return true;
     }
 
     // Setup the compression function array
@@ -899,7 +899,7 @@ int WINAPI SCompDecompress(
     char *   pbInput;                       // Where to store decompressed data
     unsigned uCompressionMask;              // Decompressions applied to the data
     int      cbOutBuffer = *pcbOutBuffer;   // Current size of the output buffer
-    int      cbInLength = cbInBuffer;       // Current size of the input buffer
+    int      cbInLength;                    // Current size of the input buffer
     int      nCompressCount = 0;            // Number of compressions to be applied
     int      nCompressIndex = 0;
     int      nResult = 1;
@@ -911,7 +911,9 @@ int WINAPI SCompDecompress(
         return 1;
     }
 
+/*
     // If the input length is the same as output length, do nothing.
+    // Unfortunately, some data in WoW-Cataclysm BETA MPQs are like that ....
     if(cbInBuffer == cbOutBuffer)
     {
         // If the buffers are equal, don't copy anything.
@@ -921,11 +923,15 @@ int WINAPI SCompDecompress(
         memcpy(pbOutBuffer, pbInBuffer, cbInBuffer);
         return 1;
     }
-    
+*/
+
     // Get applied compression types and decrement data length
     uCompressionMask = (unsigned char)*pbInBuffer++;              
-    pbInput = pbInBuffer;
     cbInBuffer--;
+
+    // Get current compressed data and length of it
+    pbInput = pbInBuffer;
+    cbInLength = cbInBuffer;
 
     //
     // Beginning with Starcraft II, the decompression byte can no longer contain
@@ -992,7 +998,7 @@ int WINAPI SCompDecompress(
             nResult = DecompressFuncArray[i](pbOutput, &cbOutBuffer, pbInput, cbInLength);
             if(nResult == 0 || cbOutBuffer == 0)
             {
-                SetLastError(ERROR_GEN_FAILURE);
+                SetLastError(ERROR_FILE_CORRUPT);
                 nResult = 0;
                 break;
             }

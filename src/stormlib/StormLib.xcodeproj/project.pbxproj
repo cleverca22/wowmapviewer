@@ -27,48 +27,57 @@
 		2254917B11948CE70044424D /* crypt_ltc_mp_descriptor.c in Sources */ = {isa = PBXBuildFile; fileRef = 22C9184811933FCF0083AC69 /* crypt_ltc_mp_descriptor.c */; settings = {COMPILER_FLAGS = "-fno-common"; }; };
 		225530DB1056BC7900FA646A /* huff.h in Headers */ = {isa = PBXBuildFile; fileRef = 32ED009D0D03542A00AB0B4E /* huff.h */; };
 		225530DE1056BC7900FA646A /* pklib.h in Headers */ = {isa = PBXBuildFile; fileRef = 32ED00A80D03542A00AB0B4E /* pklib.h */; };
-		225530DF1056BC7900FA646A /* SCommon.h in Headers */ = {isa = PBXBuildFile; fileRef = 32ED00AB0D03542A00AB0B4E /* SCommon.h */; };
+		225530DF1056BC7900FA646A /* StormCommon.h in Headers */ = {isa = PBXBuildFile; fileRef = 32ED00AB0D03542A00AB0B4E /* StormCommon.h */; };
 		225530E01056BC7900FA646A /* StormLib.h in Headers */ = {isa = PBXBuildFile; fileRef = 32ED00B60D03542A00AB0B4E /* StormLib.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		225530E11056BC7900FA646A /* StormPort.h in Headers */ = {isa = PBXBuildFile; fileRef = 32ED00B70D03542A00AB0B4E /* StormPort.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		225530E31056BC8700FA646A /* huff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32ED009C0D03542A00AB0B4E /* huff.cpp */; };
 		225530E61056BC8700FA646A /* explode.c in Sources */ = {isa = PBXBuildFile; fileRef = 32ED00A60D03542A00AB0B4E /* explode.c */; };
 		225530E71056BC8700FA646A /* implode.c in Sources */ = {isa = PBXBuildFile; fileRef = 32ED00A70D03542A00AB0B4E /* implode.c */; };
 		225530E81056BC8700FA646A /* SFileAttributes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32ED00A90D03542A00AB0B4E /* SFileAttributes.cpp */; };
-		225530E91056BC8700FA646A /* SCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32ED00AA0D03542A00AB0B4E /* SCommon.cpp */; };
+		225530E91056BC8700FA646A /* SBaseCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32ED00AA0D03542A00AB0B4E /* SBaseCommon.cpp */; };
 		225530EA1056BC8700FA646A /* SCompression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32ED00AC0D03542A00AB0B4E /* SCompression.cpp */; };
 		225530EB1056BC8700FA646A /* SFileCompactArchive.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32ED00AD0D03542A00AB0B4E /* SFileCompactArchive.cpp */; };
-		225530EC1056BC8700FA646A /* SFileCreateArchiveEx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32ED00AE0D03542A00AB0B4E /* SFileCreateArchiveEx.cpp */; };
+		225530EC1056BC8700FA646A /* SFileCreateArchive.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32ED00AE0D03542A00AB0B4E /* SFileCreateArchive.cpp */; };
 		225530ED1056BC8700FA646A /* SFileExtractFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32ED00AF0D03542A00AB0B4E /* SFileExtractFile.cpp */; };
 		225530EE1056BC8700FA646A /* SFileFindFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32ED00B00D03542A00AB0B4E /* SFileFindFile.cpp */; };
 		225530EF1056BC8700FA646A /* SFileOpenArchive.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32ED00B10D03542A00AB0B4E /* SFileOpenArchive.cpp */; };
 		225530F01056BC8700FA646A /* SFileOpenFileEx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32ED00B20D03542A00AB0B4E /* SFileOpenFileEx.cpp */; };
 		225530F11056BC8700FA646A /* SFileReadFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32ED00B30D03542A00AB0B4E /* SFileReadFile.cpp */; };
 		225530F21056BC8700FA646A /* SFileListFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32ED00B40D03542A00AB0B4E /* SFileListFile.cpp */; };
-		225530F31056BC8700FA646A /* StormPortMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32ED00B90D03542A00AB0B4E /* StormPortMac.cpp */; };
-		225530F51056BC8E00FA646A /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 32D20A8A0CF3902D00230E7A /* libbz2.dylib */; settings = {ATTRIBUTES = (Required, ); }; };
-		225530F61056BC8E00FA646A /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 32D20A8B0CF3902D00230E7A /* libz.dylib */; };
+		225C734D1257CCC70009E8DA /* lookup.h in Headers */ = {isa = PBXBuildFile; fileRef = 225C734B1257CCC70009E8DA /* lookup.h */; };
+		225C734F1257CCC70009E8DA /* lookup.h in Headers */ = {isa = PBXBuildFile; fileRef = 225C734B1257CCC70009E8DA /* lookup.h */; };
+		225C73501257CCC70009E8DA /* lookup3.c in Sources */ = {isa = PBXBuildFile; fileRef = 225C734C1257CCC70009E8DA /* lookup3.c */; };
+		225C73541257CD0C0009E8DA /* SBaseFileTable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 225C73531257CD0C0009E8DA /* SBaseFileTable.cpp */; };
+		225C73551257CD0C0009E8DA /* SBaseFileTable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 225C73531257CD0C0009E8DA /* SBaseFileTable.cpp */; };
+		225C735A1257CD1F0009E8DA /* lookup3.c in Sources */ = {isa = PBXBuildFile; fileRef = 225C734C1257CCC70009E8DA /* lookup3.c */; };
 		225FAC9C0E53BAA100DA2CAE /* huff.h in Headers */ = {isa = PBXBuildFile; fileRef = 32ED009D0D03542A00AB0B4E /* huff.h */; };
 		225FAC9F0E53BAA100DA2CAE /* pklib.h in Headers */ = {isa = PBXBuildFile; fileRef = 32ED00A80D03542A00AB0B4E /* pklib.h */; };
-		225FACA00E53BAA100DA2CAE /* SCommon.h in Headers */ = {isa = PBXBuildFile; fileRef = 32ED00AB0D03542A00AB0B4E /* SCommon.h */; };
+		225FACA00E53BAA100DA2CAE /* StormCommon.h in Headers */ = {isa = PBXBuildFile; fileRef = 32ED00AB0D03542A00AB0B4E /* StormCommon.h */; };
 		225FACA10E53BAA100DA2CAE /* StormLib.h in Headers */ = {isa = PBXBuildFile; fileRef = 32ED00B60D03542A00AB0B4E /* StormLib.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		225FACA20E53BAA100DA2CAE /* StormPort.h in Headers */ = {isa = PBXBuildFile; fileRef = 32ED00B70D03542A00AB0B4E /* StormPort.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		225FACA50E53BAB400DA2CAE /* huff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32ED009C0D03542A00AB0B4E /* huff.cpp */; };
 		225FACA90E53BAB400DA2CAE /* explode.c in Sources */ = {isa = PBXBuildFile; fileRef = 32ED00A60D03542A00AB0B4E /* explode.c */; };
 		225FACAA0E53BAB400DA2CAE /* implode.c in Sources */ = {isa = PBXBuildFile; fileRef = 32ED00A70D03542A00AB0B4E /* implode.c */; };
 		225FACAB0E53BAB400DA2CAE /* SFileAttributes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32ED00A90D03542A00AB0B4E /* SFileAttributes.cpp */; };
-		225FACAC0E53BAB400DA2CAE /* SCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32ED00AA0D03542A00AB0B4E /* SCommon.cpp */; };
+		225FACAC0E53BAB400DA2CAE /* SBaseCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32ED00AA0D03542A00AB0B4E /* SBaseCommon.cpp */; };
 		225FACAD0E53BAB400DA2CAE /* SCompression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32ED00AC0D03542A00AB0B4E /* SCompression.cpp */; };
 		225FACAE0E53BAB400DA2CAE /* SFileCompactArchive.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32ED00AD0D03542A00AB0B4E /* SFileCompactArchive.cpp */; };
-		225FACAF0E53BAB400DA2CAE /* SFileCreateArchiveEx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32ED00AE0D03542A00AB0B4E /* SFileCreateArchiveEx.cpp */; };
+		225FACAF0E53BAB400DA2CAE /* SFileCreateArchive.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32ED00AE0D03542A00AB0B4E /* SFileCreateArchive.cpp */; };
 		225FACB00E53BAB400DA2CAE /* SFileExtractFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32ED00AF0D03542A00AB0B4E /* SFileExtractFile.cpp */; };
 		225FACB10E53BAB400DA2CAE /* SFileFindFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32ED00B00D03542A00AB0B4E /* SFileFindFile.cpp */; };
 		225FACB20E53BAB400DA2CAE /* SFileOpenArchive.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32ED00B10D03542A00AB0B4E /* SFileOpenArchive.cpp */; };
 		225FACB30E53BAB400DA2CAE /* SFileOpenFileEx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32ED00B20D03542A00AB0B4E /* SFileOpenFileEx.cpp */; };
 		225FACB40E53BAB400DA2CAE /* SFileReadFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32ED00B30D03542A00AB0B4E /* SFileReadFile.cpp */; };
 		225FACB50E53BAB400DA2CAE /* SFileListFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32ED00B40D03542A00AB0B4E /* SFileListFile.cpp */; };
-		225FACB60E53BAB400DA2CAE /* StormPortMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32ED00B90D03542A00AB0B4E /* StormPortMac.cpp */; };
 		225FADD40E53C06600DA2CAE /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 32D20A8A0CF3902D00230E7A /* libbz2.dylib */; settings = {ATTRIBUTES = (Required, ); }; };
 		225FADD50E53C06600DA2CAE /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 32D20A8B0CF3902D00230E7A /* libz.dylib */; settings = {ATTRIBUTES = (Required, ); }; };
+		228B538411BF7D0D001A58DA /* FileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 228B538311BF7D0D001A58DA /* FileStream.cpp */; };
+		228B538511BF7D0D001A58DA /* FileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 228B538311BF7D0D001A58DA /* FileStream.cpp */; };
+		22954AD211D463AB0064B264 /* Test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2295488911D45A820064B264 /* Test.cpp */; };
+		22954AD311D463B50064B264 /* libStormLib.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 225530D41056BAC800FA646A /* libStormLib.a */; };
+		22954AD611D463BE0064B264 /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 32D20A8A0CF3902D00230E7A /* libbz2.dylib */; };
+		22954AD711D463BE0064B264 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 32D20A8B0CF3902D00230E7A /* libz.dylib */; };
+		22954AD811D463BE0064B264 /* libgcc_s.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 22549054119489060044424D /* libgcc_s.1.dylib */; };
 		2299D9D71167EFA8005C19BF /* adpcm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2299D9D51167EFA8005C19BF /* adpcm.cpp */; };
 		2299D9D81167EFA8005C19BF /* adpcm.h in Headers */ = {isa = PBXBuildFile; fileRef = 2299D9D61167EFA8005C19BF /* adpcm.h */; };
 		2299D9D91167EFA8005C19BF /* adpcm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2299D9D51167EFA8005C19BF /* adpcm.cpp */; };
@@ -79,6 +88,8 @@
 		2299D9E11167EFC6005C19BF /* sparse.h in Headers */ = {isa = PBXBuildFile; fileRef = 2299D9DD1167EFC6005C19BF /* sparse.h */; };
 		2299DA4E1167FD16005C19BF /* SFileAddFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2299DA4D1167FD16005C19BF /* SFileAddFile.cpp */; };
 		2299DA4F1167FD16005C19BF /* SFileAddFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2299DA4D1167FD16005C19BF /* SFileAddFile.cpp */; };
+		22AEA122123125D800359B16 /* SFilePatchArchives.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22AEA121123125D800359B16 /* SFilePatchArchives.cpp */; };
+		22AEA123123125D800359B16 /* SFilePatchArchives.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22AEA121123125D800359B16 /* SFilePatchArchives.cpp */; };
 		22C9187D11933FCF0083AC69 /* hash_memory.c in Sources */ = {isa = PBXBuildFile; fileRef = 22C9182B11933FCF0083AC69 /* hash_memory.c */; };
 		22C9187E11933FCF0083AC69 /* md5.c in Sources */ = {isa = PBXBuildFile; fileRef = 22C9182C11933FCF0083AC69 /* md5.c */; };
 		22C9187F11933FCF0083AC69 /* sha1.c in Sources */ = {isa = PBXBuildFile; fileRef = 22C9182D11933FCF0083AC69 /* sha1.c */; };
@@ -472,6 +483,16 @@
 		22F5A9C61193DFBA00F8B121 /* SFileVerify.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22F5A9C41193DFBA00F8B121 /* SFileVerify.cpp */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		2229F62E11D4653600118914 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 225530D31056BAC800FA646A;
+			remoteInfo = StormLib;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		221F6A721168529C0026C852 /* LzmaDec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LzmaDec.h; path = C/LzmaDec.h; sourceTree = "<group>"; };
 		221F6A731168529C0026C852 /* LzmaEnc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LzmaEnc.h; path = C/LzmaEnc.h; sourceTree = "<group>"; };
@@ -484,13 +505,20 @@
 		2253A19F10568A83001909F9 /* StormLib.exp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.exports; name = StormLib.exp; path = stormlib_dll/StormLib.exp; sourceTree = "<group>"; };
 		22549054119489060044424D /* libgcc_s.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libgcc_s.1.dylib; path = /usr/lib/libgcc_s.1.dylib; sourceTree = "<absolute>"; };
 		225530D41056BAC800FA646A /* libStormLib.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libStormLib.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		225C734B1257CCC70009E8DA /* lookup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lookup.h; sourceTree = "<group>"; };
+		225C734C1257CCC70009E8DA /* lookup3.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = lookup3.c; sourceTree = "<group>"; };
+		225C73531257CD0C0009E8DA /* SBaseFileTable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SBaseFileTable.cpp; path = src/SBaseFileTable.cpp; sourceTree = "<group>"; };
 		225FAC940E53B7F800DA2CAE /* StormLib.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = StormLib.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		225FAC950E53B7F800DA2CAE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		228B538311BF7D0D001A58DA /* FileStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FileStream.cpp; path = src/FileStream.cpp; sourceTree = "<group>"; };
+		2295488911D45A820064B264 /* Test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Test.cpp; path = test/Test.cpp; sourceTree = "<group>"; };
+		22954ACE11D463A30064B264 /* StormLib_Test */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = StormLib_Test; sourceTree = BUILT_PRODUCTS_DIR; };
 		2299D9D51167EFA8005C19BF /* adpcm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = adpcm.cpp; sourceTree = "<group>"; };
 		2299D9D61167EFA8005C19BF /* adpcm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = adpcm.h; sourceTree = "<group>"; };
 		2299D9DC1167EFC6005C19BF /* sparse.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sparse.cpp; sourceTree = "<group>"; };
 		2299D9DD1167EFC6005C19BF /* sparse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sparse.h; sourceTree = "<group>"; };
 		2299DA4D1167FD16005C19BF /* SFileAddFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SFileAddFile.cpp; path = src/SFileAddFile.cpp; sourceTree = "<group>"; };
+		22AEA121123125D800359B16 /* SFilePatchArchives.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SFilePatchArchives.cpp; path = src/SFilePatchArchives.cpp; sourceTree = "<group>"; };
 		22C9182B11933FCF0083AC69 /* hash_memory.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hash_memory.c; sourceTree = "<group>"; };
 		22C9182C11933FCF0083AC69 /* md5.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = md5.c; sourceTree = "<group>"; };
 		22C9182D11933FCF0083AC69 /* sha1.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sha1.c; sourceTree = "<group>"; };
@@ -695,11 +723,11 @@
 		32ED00A70D03542A00AB0B4E /* implode.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = implode.c; sourceTree = "<group>"; };
 		32ED00A80D03542A00AB0B4E /* pklib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pklib.h; sourceTree = "<group>"; };
 		32ED00A90D03542A00AB0B4E /* SFileAttributes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SFileAttributes.cpp; path = src/SFileAttributes.cpp; sourceTree = "<group>"; };
-		32ED00AA0D03542A00AB0B4E /* SCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SCommon.cpp; path = src/SCommon.cpp; sourceTree = "<group>"; };
-		32ED00AB0D03542A00AB0B4E /* SCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SCommon.h; path = src/SCommon.h; sourceTree = "<group>"; };
+		32ED00AA0D03542A00AB0B4E /* SBaseCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SBaseCommon.cpp; path = src/SBaseCommon.cpp; sourceTree = "<group>"; };
+		32ED00AB0D03542A00AB0B4E /* StormCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StormCommon.h; path = src/StormCommon.h; sourceTree = "<group>"; };
 		32ED00AC0D03542A00AB0B4E /* SCompression.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SCompression.cpp; path = src/SCompression.cpp; sourceTree = "<group>"; };
 		32ED00AD0D03542A00AB0B4E /* SFileCompactArchive.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SFileCompactArchive.cpp; path = src/SFileCompactArchive.cpp; sourceTree = "<group>"; };
-		32ED00AE0D03542A00AB0B4E /* SFileCreateArchiveEx.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SFileCreateArchiveEx.cpp; path = src/SFileCreateArchiveEx.cpp; sourceTree = "<group>"; };
+		32ED00AE0D03542A00AB0B4E /* SFileCreateArchive.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SFileCreateArchive.cpp; path = src/SFileCreateArchive.cpp; sourceTree = "<group>"; };
 		32ED00AF0D03542A00AB0B4E /* SFileExtractFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SFileExtractFile.cpp; path = src/SFileExtractFile.cpp; sourceTree = "<group>"; };
 		32ED00B00D03542A00AB0B4E /* SFileFindFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SFileFindFile.cpp; path = src/SFileFindFile.cpp; sourceTree = "<group>"; };
 		32ED00B10D03542A00AB0B4E /* SFileOpenArchive.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SFileOpenArchive.cpp; path = src/SFileOpenArchive.cpp; sourceTree = "<group>"; };
@@ -708,7 +736,6 @@
 		32ED00B40D03542A00AB0B4E /* SFileListFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SFileListFile.cpp; path = src/SFileListFile.cpp; sourceTree = "<group>"; };
 		32ED00B60D03542A00AB0B4E /* StormLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StormLib.h; path = src/StormLib.h; sourceTree = "<group>"; };
 		32ED00B70D03542A00AB0B4E /* StormPort.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StormPort.h; path = src/StormPort.h; sourceTree = "<group>"; };
-		32ED00B90D03542A00AB0B4E /* StormPortMac.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = StormPortMac.cpp; path = src/StormPortMac.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -716,8 +743,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				225530F51056BC8E00FA646A /* libbz2.dylib in Frameworks */,
-				225530F61056BC8E00FA646A /* libz.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -731,6 +756,17 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		22954ACC11D463A30064B264 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				22954AD611D463BE0064B264 /* libbz2.dylib in Frameworks */,
+				22954AD711D463BE0064B264 /* libz.dylib in Frameworks */,
+				22954AD811D463BE0064B264 /* libgcc_s.1.dylib in Frameworks */,
+				22954AD311D463B50064B264 /* libStormLib.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -739,6 +775,7 @@
 			children = (
 				225FAC940E53B7F800DA2CAE /* StormLib.framework */,
 				225530D41056BAC800FA646A /* libStormLib.a */,
+				22954ACE11D463A30064B264 /* StormLib_Test */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -747,6 +784,7 @@
 			isa = PBXGroup;
 			children = (
 				32DBEE830D00E58F00DB1E81 /* Source */,
+				2295488711D45A520064B264 /* Test */,
 				0867D69AFE84028FC02AAC07 /* External Frameworks and Libraries */,
 				22B54B321054B287001D6436 /* Resources */,
 				034768DDFF38A45A11DB9C8B /* Products */,
@@ -779,6 +817,24 @@
 			);
 			name = lzma;
 			path = src/lzma;
+			sourceTree = "<group>";
+		};
+		225C734A1257CCC70009E8DA /* jenkins */ = {
+			isa = PBXGroup;
+			children = (
+				225C734B1257CCC70009E8DA /* lookup.h */,
+				225C734C1257CCC70009E8DA /* lookup3.c */,
+			);
+			name = jenkins;
+			path = src/jenkins;
+			sourceTree = "<group>";
+		};
+		2295488711D45A520064B264 /* Test */ = {
+			isa = PBXGroup;
+			children = (
+				2295488911D45A820064B264 /* Test.cpp */,
+			);
+			name = Test;
 			sourceTree = "<group>";
 		};
 		2299D9D41167EFA8005C19BF /* adpcm */ = {
@@ -1102,28 +1158,31 @@
 			children = (
 				2299D9D41167EFA8005C19BF /* adpcm */,
 				32ED009B0D03542A00AB0B4E /* huffman */,
+				225C734A1257CCC70009E8DA /* jenkins */,
 				22C9181D11933E3A0083AC69 /* libtomcrypt */,
 				22C9181E11933E470083AC69 /* libtommath */,
 				221F652D116851D70026C852 /* lzma */,
 				32ED00A40D03542A00AB0B4E /* pklib */,
 				2299D9DB1167EFC6005C19BF /* sparse */,
-				32ED00AA0D03542A00AB0B4E /* SCommon.cpp */,
-				32ED00AB0D03542A00AB0B4E /* SCommon.h */,
+				228B538311BF7D0D001A58DA /* FileStream.cpp */,
+				32ED00AA0D03542A00AB0B4E /* SBaseCommon.cpp */,
+				225C73531257CD0C0009E8DA /* SBaseFileTable.cpp */,
 				32ED00AC0D03542A00AB0B4E /* SCompression.cpp */,
 				2299DA4D1167FD16005C19BF /* SFileAddFile.cpp */,
 				32ED00A90D03542A00AB0B4E /* SFileAttributes.cpp */,
 				32ED00AD0D03542A00AB0B4E /* SFileCompactArchive.cpp */,
-				32ED00AE0D03542A00AB0B4E /* SFileCreateArchiveEx.cpp */,
+				32ED00AE0D03542A00AB0B4E /* SFileCreateArchive.cpp */,
 				32ED00AF0D03542A00AB0B4E /* SFileExtractFile.cpp */,
 				32ED00B00D03542A00AB0B4E /* SFileFindFile.cpp */,
 				32ED00B40D03542A00AB0B4E /* SFileListFile.cpp */,
 				32ED00B10D03542A00AB0B4E /* SFileOpenArchive.cpp */,
 				32ED00B20D03542A00AB0B4E /* SFileOpenFileEx.cpp */,
+				22AEA121123125D800359B16 /* SFilePatchArchives.cpp */,
 				32ED00B30D03542A00AB0B4E /* SFileReadFile.cpp */,
 				22F5A9C41193DFBA00F8B121 /* SFileVerify.cpp */,
+				32ED00AB0D03542A00AB0B4E /* StormCommon.h */,
 				32ED00B60D03542A00AB0B4E /* StormLib.h */,
 				32ED00B70D03542A00AB0B4E /* StormPort.h */,
-				32ED00B90D03542A00AB0B4E /* StormPortMac.cpp */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -1158,7 +1217,7 @@
 			files = (
 				225530DB1056BC7900FA646A /* huff.h in Headers */,
 				225530DE1056BC7900FA646A /* pklib.h in Headers */,
-				225530DF1056BC7900FA646A /* SCommon.h in Headers */,
+				225530DF1056BC7900FA646A /* StormCommon.h in Headers */,
 				225530E01056BC7900FA646A /* StormLib.h in Headers */,
 				225530E11056BC7900FA646A /* StormPort.h in Headers */,
 				2299D9DA1167EFA8005C19BF /* adpcm.h in Headers */,
@@ -1184,6 +1243,7 @@
 				22C91A001193400A0083AC69 /* tommath_class.h in Headers */,
 				22C91A011193400A0083AC69 /* tommath_superclass.h in Headers */,
 				22C91A021193400A0083AC69 /* tommath.h in Headers */,
+				225C734F1257CCC70009E8DA /* lookup.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1193,7 +1253,7 @@
 			files = (
 				225FAC9C0E53BAA100DA2CAE /* huff.h in Headers */,
 				225FAC9F0E53BAA100DA2CAE /* pklib.h in Headers */,
-				225FACA00E53BAA100DA2CAE /* SCommon.h in Headers */,
+				225FACA00E53BAA100DA2CAE /* StormCommon.h in Headers */,
 				225FACA10E53BAA100DA2CAE /* StormLib.h in Headers */,
 				225FACA20E53BAA100DA2CAE /* StormPort.h in Headers */,
 				2299D9D81167EFA8005C19BF /* adpcm.h in Headers */,
@@ -1219,6 +1279,7 @@
 				22C91A791193400A0083AC69 /* tommath_class.h in Headers */,
 				22C91A7A1193400A0083AC69 /* tommath_superclass.h in Headers */,
 				22C91A7B1193400A0083AC69 /* tommath.h in Headers */,
+				225C734D1257CCC70009E8DA /* lookup.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1238,7 +1299,7 @@
 			dependencies = (
 			);
 			name = StormLib;
-			productName = StormLibd;
+			productName = StormLib;
 			productReference = 225530D41056BAC800FA646A /* libStormLib.a */;
 			productType = "com.apple.product-type.library.static";
 		};
@@ -1260,6 +1321,23 @@
 			productReference = 225FAC940E53B7F800DA2CAE /* StormLib.framework */;
 			productType = "com.apple.product-type.framework";
 		};
+		22954ACD11D463A30064B264 /* StormLib_Test */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 22954AD911D463E00064B264 /* Build configuration list for PBXNativeTarget "StormLib_Test" */;
+			buildPhases = (
+				22954ACB11D463A30064B264 /* Sources */,
+				22954ACC11D463A30064B264 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				2229F62F11D4653600118914 /* PBXTargetDependency */,
+			);
+			name = StormLib_Test;
+			productName = StormLib_Test;
+			productReference = 22954ACE11D463A30064B264 /* StormLib_Test */;
+			productType = "com.apple.product-type.tool";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -1275,6 +1353,7 @@
 			targets = (
 				225530D31056BAC800FA646A /* StormLib */,
 				225FAC930E53B7F800DA2CAE /* StormLibFramework */,
+				22954ACD11D463A30064B264 /* StormLib_Test */,
 			);
 		};
 /* End PBXProject section */
@@ -1298,17 +1377,16 @@
 				225530E61056BC8700FA646A /* explode.c in Sources */,
 				225530E71056BC8700FA646A /* implode.c in Sources */,
 				225530E81056BC8700FA646A /* SFileAttributes.cpp in Sources */,
-				225530E91056BC8700FA646A /* SCommon.cpp in Sources */,
+				225530E91056BC8700FA646A /* SBaseCommon.cpp in Sources */,
 				225530EA1056BC8700FA646A /* SCompression.cpp in Sources */,
 				225530EB1056BC8700FA646A /* SFileCompactArchive.cpp in Sources */,
-				225530EC1056BC8700FA646A /* SFileCreateArchiveEx.cpp in Sources */,
+				225530EC1056BC8700FA646A /* SFileCreateArchive.cpp in Sources */,
 				225530ED1056BC8700FA646A /* SFileExtractFile.cpp in Sources */,
 				225530EE1056BC8700FA646A /* SFileFindFile.cpp in Sources */,
 				225530EF1056BC8700FA646A /* SFileOpenArchive.cpp in Sources */,
 				225530F01056BC8700FA646A /* SFileOpenFileEx.cpp in Sources */,
 				225530F11056BC8700FA646A /* SFileReadFile.cpp in Sources */,
 				225530F21056BC8700FA646A /* SFileListFile.cpp in Sources */,
-				225530F31056BC8700FA646A /* StormPortMac.cpp in Sources */,
 				2299D9D91167EFA8005C19BF /* adpcm.cpp in Sources */,
 				2299D9E01167EFC6005C19BF /* sparse.cpp in Sources */,
 				2299DA4F1167FD16005C19BF /* SFileAddFile.cpp in Sources */,
@@ -1495,6 +1573,10 @@
 				22C919FE1193400A0083AC69 /* bn_s_mp_sub.c in Sources */,
 				22C919FF1193400A0083AC69 /* bncore.c in Sources */,
 				22F5A9C51193DFBA00F8B121 /* SFileVerify.cpp in Sources */,
+				228B538511BF7D0D001A58DA /* FileStream.cpp in Sources */,
+				22AEA123123125D800359B16 /* SFilePatchArchives.cpp in Sources */,
+				225C73501257CCC70009E8DA /* lookup3.c in Sources */,
+				225C73551257CD0C0009E8DA /* SBaseFileTable.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1506,17 +1588,16 @@
 				225FACA90E53BAB400DA2CAE /* explode.c in Sources */,
 				225FACAA0E53BAB400DA2CAE /* implode.c in Sources */,
 				225FACAB0E53BAB400DA2CAE /* SFileAttributes.cpp in Sources */,
-				225FACAC0E53BAB400DA2CAE /* SCommon.cpp in Sources */,
+				225FACAC0E53BAB400DA2CAE /* SBaseCommon.cpp in Sources */,
 				225FACAD0E53BAB400DA2CAE /* SCompression.cpp in Sources */,
 				225FACAE0E53BAB400DA2CAE /* SFileCompactArchive.cpp in Sources */,
-				225FACAF0E53BAB400DA2CAE /* SFileCreateArchiveEx.cpp in Sources */,
+				225FACAF0E53BAB400DA2CAE /* SFileCreateArchive.cpp in Sources */,
 				225FACB00E53BAB400DA2CAE /* SFileExtractFile.cpp in Sources */,
 				225FACB10E53BAB400DA2CAE /* SFileFindFile.cpp in Sources */,
 				225FACB20E53BAB400DA2CAE /* SFileOpenArchive.cpp in Sources */,
 				225FACB30E53BAB400DA2CAE /* SFileOpenFileEx.cpp in Sources */,
 				225FACB40E53BAB400DA2CAE /* SFileReadFile.cpp in Sources */,
 				225FACB50E53BAB400DA2CAE /* SFileListFile.cpp in Sources */,
-				225FACB60E53BAB400DA2CAE /* StormPortMac.cpp in Sources */,
 				2299D9D71167EFA8005C19BF /* adpcm.cpp in Sources */,
 				2299D9DE1167EFC6005C19BF /* sparse.cpp in Sources */,
 				2299DA4E1167FD16005C19BF /* SFileAddFile.cpp in Sources */,
@@ -1703,22 +1784,37 @@
 				22C91A771193400A0083AC69 /* bn_s_mp_sub.c in Sources */,
 				22C91A781193400A0083AC69 /* bncore.c in Sources */,
 				22F5A9C61193DFBA00F8B121 /* SFileVerify.cpp in Sources */,
+				228B538411BF7D0D001A58DA /* FileStream.cpp in Sources */,
+				22AEA122123125D800359B16 /* SFilePatchArchives.cpp in Sources */,
+				225C73541257CD0C0009E8DA /* SBaseFileTable.cpp in Sources */,
+				225C735A1257CD1F0009E8DA /* lookup3.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		22954ACB11D463A30064B264 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				22954AD211D463AB0064B264 /* Test.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		2229F62F11D4653600118914 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 225530D31056BAC800FA646A /* StormLib */;
+			targetProxy = 2229F62E11D4653600118914 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		1DEB916508733D950010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					i386,
-					ppc,
-					x86_64,
-					ppc64,
-				);
+				ARCHS = "$(ONLY_ACTIVE_ARCH_PRE_XCODE_3_1)";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
@@ -1731,7 +1827,7 @@
 				GCC_VERSION = 4.0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				ONLY_ACTIVE_ARCH = YES;
+				ONLY_ACTIVE_ARCH_PRE_XCODE_3_1 = "$(NATIVE_ARCH_ACTUAL)";
 				OTHER_LDFLAGS = (
 					"-framework",
 					Carbon,
@@ -1739,7 +1835,6 @@
 				PREBINDING = NO;
 				SDKROOT_i386 = macosx10.4;
 				SDKROOT_ppc = macosx10.4;
-				SDKROOT_ppc64 = macosx10.5;
 				SDKROOT_x86_64 = macosx10.5;
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
@@ -1750,12 +1845,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					i386,
-					ppc,
-					x86_64,
-					ppc64,
-				);
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1 = "x86_64 i386 ppc";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
@@ -1771,7 +1862,6 @@
 				PREBINDING = NO;
 				SDKROOT_i386 = macosx10.4;
 				SDKROOT_ppc = macosx10.4;
-				SDKROOT_ppc64 = macosx10.5;
 				SDKROOT_x86_64 = macosx10.5;
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = YES;
@@ -1807,11 +1897,11 @@
 		225FAC960E53B7F900DA2CAE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				EXPORTED_SYMBOLS_FILE = "$(PROJECT_DIR)/stormlibdll/StormLib.exp";
+				EXPORTED_SYMBOLS_FILE = "$(PROJECT_DIR)/stormlib_dll/StormLib.exp";
 				FRAMEWORK_VERSION = A;
 				GCC_DYNAMIC_NO_PIC = NO;
 				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "$(HOME)/Library/Frameworks";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				PREBINDING = NO;
 				PRODUCT_NAME = StormLib;
 			};
@@ -1820,12 +1910,42 @@
 		225FAC970E53B7F900DA2CAE /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				EXPORTED_SYMBOLS_FILE = "$(PROJECT_DIR)/stormlibdll/StormLib.exp";
+				EXPORTED_SYMBOLS_FILE = "$(PROJECT_DIR)/stormlib_dll/StormLib.exp";
 				FRAMEWORK_VERSION = A;
 				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "$(HOME)/Library/Frameworks";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				PREBINDING = NO;
 				PRODUCT_NAME = StormLib;
+			};
+			name = Release;
+		};
+		22954AD011D463A40064B264 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = /usr/local/bin;
+				PREBINDING = NO;
+				PRODUCT_NAME = StormLib_Test;
+			};
+			name = Debug;
+		};
+		22954AD111D463A40064B264 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				PREBINDING = NO;
+				PRODUCT_NAME = StormLib_Test;
+				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
@@ -1855,6 +1975,15 @@
 			buildConfigurations = (
 				225FAC960E53B7F900DA2CAE /* Debug */,
 				225FAC970E53B7F900DA2CAE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		22954AD911D463E00064B264 /* Build configuration list for PBXNativeTarget "StormLib_Test" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				22954AD011D463A40064B264 /* Debug */,
+				22954AD111D463A40064B264 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

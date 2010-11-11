@@ -26,25 +26,27 @@ LFLAGS = -lbz2 -lz
 CFLAGS = -fPIC -D_7ZIP_ST
 CFLAGS += $(OFLAGS) $(DFLAGS)
 
-OBJS = src/adpcm/adpcm.o \
+OBJS =  src/adpcm/adpcm.o \
 	src/huffman/huff.o \
 	src/sparse/sparse.o \
+	src/FileStream.o \
 	src/SCommon.o \
 	src/SCompression.o \
 	src/SFileAddFile.o \
 	src/SFileAttributes.o \
 	src/SFileCompactArchive.o \
-	src/SFileCreateArchiveEx.o \
+	src/SFileCreateArchive.o \
 	src/SFileExtractFile.o \
 	src/SFileFindFile.o \
 	src/SFileListFile.o \
 	src/SFileOpenArchive.o \
 	src/SFileOpenFileEx.o \
+        src/SFilePatchArchives.o \
 	src/SFileReadFile.o \
-	src/SFileVerify.o \
-	src/StormPortLinux.o
+	src/SFileVerify.o
 
-COBJS = src/libtomcrypt/src/hashes/hash_memory.o \
+COBJS = src/jenkins/lookup3.o \
+        src/libtomcrypt/src/hashes/hash_memory.o \
 	src/libtomcrypt/src/hashes/md5.o \
 	src/libtomcrypt/src/hashes/sha1.o\
 	src/libtomcrypt/src/math/ltm_desc.o \
@@ -230,12 +232,15 @@ COBJS = src/libtomcrypt/src/hashes/hash_memory.o \
 	src/pklib/implode.o
 
 LIB = libStorm.so
+SLIB = libStorm.a
 
-all: $(OBJS) $(COBJS) $(LIB)
+all: $(OBJS) $(COBJS) $(LIB) $(SLIB)
 
 $(LIB): $(OBJS) $(COBJS)
 	$(C++) $(ARCH) -shared -o $(LIB) $(OBJS) $(COBJS) $(LFLAGS)
-	$(AR) rcs libStorm.a $(OBJS) $(COBJS) $(LFLAGS)
+
+$(SLIB): $(OBJS) $(COBJS)
+	$(AR) rcs $(SLIB) $(OBJS) $(COBJS)
 
 clean:
 	rm -f $(OBJS) $(COBJS) $(LIB)
@@ -253,6 +258,6 @@ all: $(LIB)
 install: $(LIB)
 	install $(LIB) /usr/local/lib
 	mkdir -p /usr/local/include/StormLib
-	cp StormLib.h /usr/local/include/StormLib
-	cp StormPort.h /usr/local/include/StormLib
+	cp src/StormLib.h /usr/local/include/StormLib
+	cp src/StormPort.h /usr/local/include/StormLib
 #	ldconfig

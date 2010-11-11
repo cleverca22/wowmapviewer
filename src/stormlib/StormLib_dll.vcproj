@@ -352,7 +352,7 @@
 			Name="Header Files"
 			>
 			<File
-				RelativePath=".\src\SCommon.h"
+				RelativePath=".\src\StormCommon.h"
 				>
 			</File>
 			<File
@@ -404,7 +404,43 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\src\SCommon.cpp"
+				RelativePath=".\src\FileStream.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						WarningLevel="4"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						WarningLevel="4"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						WarningLevel="4"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						WarningLevel="4"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\src\SBaseCommon.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -486,6 +522,10 @@
 						WarningLevel="4"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\src\SBaseFileTable.cpp"
+				>
 			</File>
 			<File
 				RelativePath=".\src\SCompression.cpp"
@@ -824,7 +864,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\src\SFileCreateArchiveEx.cpp"
+				RelativePath=".\src\SFileCreateArchive.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -1328,6 +1368,18 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\SFilePatchArchives.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						WarningLevel="4"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\src\SFileReadFile.cpp"
 				>
 				<FileConfiguration
@@ -1494,6 +1546,10 @@
 						WarningLevel="4"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\stormlib_dll\StormLib.def"
+				>
 			</File>
 			<Filter
 				Name="adpcm"
@@ -2396,6 +2452,18 @@
 				</File>
 				<File
 					RelativePath=".\src\zlib\zutil.c"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="jenkins"
+				>
+				<File
+					RelativePath=".\src\jenkins\lookup.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\jenkins\lookup3.c"
 					>
 				</File>
 			</Filter>

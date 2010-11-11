@@ -10,30 +10,26 @@
 
 #define __STORMLIB_SELF__
 #include "StormLib.h"
-#include "SCommon.h"
+#include "StormCommon.h"
 
-BOOL WINAPI SFileExtractFile(HANDLE hMpq, const char * szToExtract, const char * szExtracted)
+bool WINAPI SFileExtractFile(HANDLE hMpq, const char * szToExtract, const char * szExtracted)
 {
-    HANDLE hLocalFile = INVALID_HANDLE_VALUE;
+    TFileStream * pLocalFile = NULL;
     HANDLE hMpqFile = NULL;
-    DWORD dwSearchScope = SFILE_OPEN_FROM_MPQ;
     int nError = ERROR_SUCCESS;
-
 
     // Open the MPQ file
     if(nError == ERROR_SUCCESS)
     {
-        if((DWORD_PTR)szToExtract <= 0x10000)
-            dwSearchScope = SFILE_OPEN_BY_INDEX;
-        if(!SFileOpenFileEx(hMpq, szToExtract, dwSearchScope, &hMpqFile))
+        if(!SFileOpenFileEx(hMpq, szToExtract, SFILE_OPEN_FROM_MPQ, &hMpqFile))
             nError = GetLastError();
     }
 
     // Create the local file
     if(nError == ERROR_SUCCESS)
     {
-        hLocalFile = CreateFile(szExtracted, GENERIC_WRITE, FILE_SHARE_READ, NULL, MPQ_CREATE_ALWAYS, 0, NULL);
-        if(hLocalFile == INVALID_HANDLE_VALUE)
+        pLocalFile = FileStream_CreateFile(szExtracted);
+        if(pLocalFile == NULL)
             nError = GetLastError();
     }
 
@@ -55,18 +51,17 @@ BOOL WINAPI SFileExtractFile(HANDLE hMpq, const char * szToExtract, const char *
                 break;
 
             // If something has been actually read, write it
-            WriteFile(hLocalFile, szBuffer, dwTransferred, &dwTransferred, NULL);
-            if(dwTransferred == 0)
-                nError = ERROR_DISK_FULL;
+            if(!FileStream_Write(pLocalFile, NULL, szBuffer, dwTransferred))
+                nError = GetLastError();
         }
     }
 
     // Close the files
     if(hMpqFile != NULL)
         SFileCloseFile(hMpqFile);
-    if(hLocalFile != INVALID_HANDLE_VALUE)
-        CloseHandle(hLocalFile);
+    if(pLocalFile != NULL)
+        FileStream_Close(pLocalFile);
     if(nError != ERROR_SUCCESS)
         SetLastError(nError);
-    return (BOOL)(nError == ERROR_SUCCESS);
+    return (nError == ERROR_SUCCESS);
 }

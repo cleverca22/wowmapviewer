@@ -24,17 +24,19 @@ LIBRARY  = StormLib.dll
 OBJS_CPP = src/adpcm/adpcm.o \
            src/huffman/huff.o \
            src/sparse/sparse.o \
+           src/FileStream.o \
            src/SCommon.o \
            src/SCompression.o \
            src/SFileAddFile.o \
            src/SFileAttributes.o \
            src/SFileCompactArchive.o \
-           src/SFileCreateArchiveEx.o \
+           src/SFileCreateArchive.o \
            src/SFileExtractFile.o \
            src/SFileFindFile.o \
            src/SFileListFile.o \
            src/SFileOpenArchive.o \
            src/SFileOpenFileEx.o \
+           src/SFilePatchArchives.o \
            src/SFileReadFile.o \
            src/SFileVerify.o
               
@@ -46,6 +48,7 @@ OBJS_C   = src/bzip2/blocksort.o \
            src/bzip2/decompress.o \
            src/bzip2/huffman.o \
            src/bzip2/randtable.o \
+           src/jenkins/lookup3.o \
            src/libtomcrypt/src/hashes/hash_memory.o \
            src/libtomcrypt/src/hashes/md5.o \
            src/libtomcrypt/src/hashes/sha1.o\

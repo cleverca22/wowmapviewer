@@ -1,6 +1,6 @@
 ;
 ; Export file for Windows
-; Copyright (c) 2007 Ladislav Zezula
+; Copyright (c) 2007-2010 Ladislav Zezula
 ; ladik@zezula.net
 ;
 
@@ -8,37 +8,43 @@ LIBRARY StormLib.dll
 
 EXPORTS
 
+    SFileOpenArchive
+    SFileCreateArchive
+
     SFileSetLocale
     SFileGetLocale
-    SFileOpenArchive
+    SFileFlushArchive
     SFileCloseArchive
 
-    SFileCreateAttributes
+    SFileAddListFile
+
+    SFileSetCompactCallback
+    SFileCompactArchive
+    
+    SFileSetHashTableSize    
+    
     SFileGetAttributes
     SFileSetAttributes
     SFileUpdateFileAttributes
+
+    SFileOpenPatchArchive
+    SFileIsPatchedArchive
     
     SFileOpenFileEx
-    SFileCloseFile
     SFileGetFileSize
     SFileSetFilePointer
     SFileReadFile
+    SFileCloseFile
     
-    SFileAddListFile
-    
-    SFileCreateArchiveEx
-    
-    SFileAddFileEx
-    SFileAddFile
-    SFileAddWave
-    SFileRemoveFile
-    SFileRenameFile
-    SFileSetFileLocale
-    SFileSetDataCompression
-
     SFileHasFile
     SFileGetFileName
     SFileGetFileInfo
+
+    SFileExtractFile
+
+    SFileVerifyFile
+
+    SFileVerifyArchive
 
     SFileFindFirstFile
     SFileFindNextFile
@@ -48,16 +54,21 @@ EXPORTS
     SListFileFindNextFile
     SListFileFindClose
 
-    SFileSetCompactCallback
-    SFileCompactArchive
-
     SFileEnumLocales
+    
+    SFileCreateFile
+    SFileWriteFile
+    SFileFinishFile
+    SFileAddFileEx
+    SFileAddFile
+    SFileAddWave
+    SFileRemoveFile
+    SFileRenameFile
+    SFileSetFileLocale
+    SFileSetDataCompression
+    SFileSetAddFileCallback
 
     SCompImplode
     SCompExplode
     SCompCompress   
     SCompDecompress 
-
-    SFileVerifyFile
-    SFileVerifyArchive
-    SFileExtractFile
