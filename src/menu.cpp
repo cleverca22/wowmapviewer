@@ -300,7 +300,7 @@ void Menu::display(float t, float dt)
 			f16->shprint(380,40,"http://code.google.com/p/wowmapviewer/");
 			*/
 
-			f16->shprint(video.xres - 20 - f16->textwidth(APP_VERSION), 10, APP_VERSION);
+			f16->shprint(video.xres - 20 - f16->textwidth(APP_VERSION " " APP_BUILD), 10, APP_VERSION " " APP_BUILD);
 			
 			f24->shprint(680, 74, "Controls");
 			f16->shprint(620,110, "F1 - toggle models\n"

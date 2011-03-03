@@ -667,7 +667,7 @@ __TryAgain:
 
 static int TestArchiveOpenAndClose(const char * szMpqName)
 {
-    const char * szFileName1 = "ITEM\\TEXTURECOMPONENTS\\LegLowerTexture\\MAIL_DUNGEONSHAMAN_B_01BLUE_PANT_LL_U.BLP";
+//  const char * szFileName1 = "items\\map\\mapz0000.cel";
 //  const char * szFileName2 = "items\\map\\mapz_deleted.cel";
     TMPQArchive * ha = NULL;
     HANDLE hFile1 = NULL;
@@ -709,12 +709,23 @@ static int TestArchiveOpenAndClose(const char * szMpqName)
                 assert(false);
         }
     }
-*/
+
     // Verify the raw data in the archive
     if(nError == ERROR_SUCCESS)
     {
         // Verify the archive
-        SFileVerifyRawData(hMpq, SFILE_VERIFY_FILE, szFileName1);
+        SFileVerifyRawData(hMpq, SFILE_VERIFY_MPQ_HEADER, NULL);
+        SFileVerifyRawData(hMpq, SFILE_VERIFY_HET_TABLE, NULL);
+        SFileVerifyRawData(hMpq, SFILE_VERIFY_BET_TABLE, NULL);
+        SFileVerifyRawData(hMpq, SFILE_VERIFY_HASH_TABLE, NULL);
+        SFileVerifyRawData(hMpq, SFILE_VERIFY_BLOCK_TABLE, NULL);
+        SFileVerifyRawData(hMpq, SFILE_VERIFY_HIBLOCK_TABLE, NULL);
+        SFileVerifyRawData(hMpq, SFILE_VERIFY_FILE, LISTFILE_NAME);
+        SFileVerifyRawData(hMpq, SFILE_VERIFY_FILE, ATTRIBUTES_NAME);
+
+        // Try to rename and then remove the file
+        SFileRenameFile(hMpq, szFileName1, szFileName2);
+        SFileRemoveFile(hMpq, szFileName2, SFILE_OPEN_FROM_MPQ);
 
         // Try to open a file
         if(!SFileOpenFileEx(hMpq, szFileName1, SFILE_OPEN_FROM_MPQ, &hFile1))
@@ -732,7 +743,7 @@ static int TestArchiveOpenAndClose(const char * szMpqName)
 
         SFileReadFile(hFile1, Buffer, sizeof(Buffer), &dwBytesRead);
 	}
-/*
+
     // Verify the MPQ listfile
     if(nError == ERROR_SUCCESS)
     {
@@ -1599,7 +1610,7 @@ int main(void)
                                                                                             
     // Test the archive open and close
     if(nError == ERROR_SUCCESS)
-        nError = TestArchiveOpenAndClose(MAKE_PATH("2011 - Wow/art.MPQ"));
+        nError = TestArchiveOpenAndClose(MAKE_PATH("wow-update-13189.MPQ"));
 //      nError = TestArchiveOpenAndClose(MAKE_PATH("2011 - WoW-Cataclysm/wow-update-13202.MPQ"));
 //      nError = TestArchiveOpenAndClose(MAKE_PATH("2002 - Warcraft III/ProtectedMap_HashTable_FakeValid.w3x"));
 //      nError = TestArchiveOpenAndClose(MAKE_PATH("2010 - Starcraft II/Installer Tome 1 enGB.MPQE"));

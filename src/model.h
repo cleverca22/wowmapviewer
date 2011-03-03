@@ -1,6 +1,9 @@
 #ifndef MODEL_H
 #define MODEL_H
 
+// C++ files
+#include <vector>
+#include "video.h"
 #include "vec3d.h"
 
 class Model;
@@ -9,13 +12,10 @@ Vec3D fixCoordSystem(Vec3D v);
 
 #include "manager.h"
 #include "mpq.h"
-#include "video.h"
 
 #include "modelheaders.h"
 #include "quaternion.h"
 #include "matrix.h"
-
-#include <vector>
 
 #include "animated.h"
 #include "particle.h"
@@ -28,15 +28,16 @@ class Bone {
 	Animated<Vec3D> scale;
 
 public:
-	int parent;
 	Vec3D pivot, transPivot;
+	int16 parent;
+
 	bool billboard;
 	Matrix mat;
 	Matrix mrot;
 
 	bool calc;
 	void calcMatrix(Bone* allbones, int anim, int time);
-	void init(MPQFile &f, ModelBoneDef &b, int *global, MPQFile *animfiles);
+	void init(MPQFile &f, ModelBoneDef &b, uint32 *global, MPQFile *animfiles);
 
 };
 
@@ -48,7 +49,7 @@ public:
 	Vec3D tval, rval, sval;
 
 	void calc(int anim, int time);
-	void init(MPQFile &f, ModelTexAnimDef &mta, int *global);
+	void init(MPQFile &f, ModelTexAnimDef &mta, uint32 *global);
 	void setup(int anim);
 };
 
@@ -56,13 +57,13 @@ struct ModelColor {
 	Animated<Vec3D> color;
 	AnimatedShort opacity;
 
-	void init(MPQFile &f, ModelColorDef &mcd, int *global);
+	void init(MPQFile &f, ModelColorDef &mcd, uint32 *global);
 };
 
 struct ModelTransparency {
 	AnimatedShort trans;
 
-	void init(MPQFile &f, ModelTransDef &mtd, int *global);
+	void init(MPQFile &f, ModelTransDef &mtd, uint32 *global);
 };
 
 // copied from the .mdl docs? this might be completely wrong
@@ -77,14 +78,14 @@ enum BlendModes {
 };
 
 struct ModelRenderPass {
-	uint16 indexStart, indexCount, vertexStart, vertexEnd;
+	uint32 indexStart, indexCount, vertexStart, vertexEnd;
 	//TextureID texture, texture2;
 	int tex;
 	bool usetex2, useEnvMap, cull, trans, unlit, noZWrite, billboard;
 	float p;
 	
 	int16 texanim, color, opacity, blendmode;
-	int16 order;
+	uint16 order;
 
 	// Geoset ID
 	int geoset;
@@ -115,7 +116,7 @@ struct ModelCamera {
 	Animated<Vec3D> tPos, tTarget;
 	Animated<float> rot;
 
-	void init(MPQFile &f, ModelCameraDef &mcd, int *global);
+	void init(MPQFile &f, ModelCameraDef &mcd, uint32 *global);
 	void setup(int time=0);
 
 	ModelCamera():ok(false) {}
@@ -127,7 +128,7 @@ struct ModelLight {
 	Animated<Vec3D> diffColor, ambColor;
 	Animated<float> diffIntensity, ambIntensity;
 
-	void init(MPQFile &f, ModelLightDef &mld, int *global);
+	void init(MPQFile &f, ModelLightDef &mld, uint32 *global);
 	void setup(int time, GLuint l);
 };
 
@@ -147,7 +148,7 @@ class Model: public ManagedItem {
 	ModelHeader header;
 	TextureAnim *texAnims;
 	ModelAnimation *anims;
-	int *globalSequences;
+	uint32 *globalSequences;
 	ModelColor *colors;
 	ModelTransparency *transparency;
 	ModelLight *lights;

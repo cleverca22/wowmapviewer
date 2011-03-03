@@ -7,6 +7,7 @@
 #include <string>
 #include <set>
 #include <vector>
+#include "util.h"
 
 struct FileTreeItem {
 	std::string fn;
@@ -27,9 +28,11 @@ class MPQArchive
 {
 	//MPQHANDLE handle;
 	HANDLE mpq_a;
+	bool ok;
 public:
 	MPQArchive(const char* filename);
 	~MPQArchive();
+	bool isPartialMPQ(const char* filename);
 
 	void close();
 };
@@ -47,7 +50,7 @@ class MPQFile
 	void operator=(const MPQFile &f) {}
 
 public:
-	MPQFile():eof(false),size(0),buffer(0),pointer(0) {}
+	MPQFile():eof(false),buffer(0),pointer(0),size(0) {}
 	MPQFile(const char* filename);	// filenames are not case sensitive
 	void openFile(const char* filename);
 	~MPQFile();
@@ -57,13 +60,15 @@ public:
 	unsigned char* getBuffer();
 	unsigned char* getPointer();
 	bool isEof();
-	void seek(int offset);
-	void seekRelative(int offset);
+	void seek(ssize_t offset);
+	void seekRelative(ssize_t offset);
 	void close();
 	void save(const char* filename);
 
 	static bool exists(const char* filename);
 	static int getSize(const char* filename); // Used to do a quick check to see if a file is corrupted
+	static const char* getArchive(const char* filename);
+	bool isPartialMPQ(const char* filename);
 };
 
 inline void flipcc(char *fcc)

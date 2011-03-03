@@ -146,14 +146,14 @@ struct WaterLayer
 void fprintbu8( FILE* file, uint8 value )
 {
 	bool b[8];
-	unsigned x = 1;
-	for( unsigned i = 0; i < 8; i++ )
+	unsigned int x = 1;
+	for (size_t i = 0; i < 8; i++ )
 	{
 		b[i] = value & x;
 		x <<= 1;
 	}
 
-	for( unsigned i = 0 ; i < 8; i++ )
+	for (size_t i = 0 ; i < 8; i++ )
 	{
 		if( b[i] )
 			fprintf( file, "1" );
@@ -294,7 +294,7 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 			*/
 			// mapchunk offsets/sizes
 			if (size == CHUNKS_IN_TILE*CHUNKS_IN_TILE*16) {
-				for (int i=0; i<CHUNKS_IN_TILE*CHUNKS_IN_TILE; i++) {
+				for (size_t i=0; i<CHUNKS_IN_TILE*CHUNKS_IN_TILE; i++) {
 					f.read(&mcnk_offsets[i], 4);
 					f.read(&mcnk_sizes[i], 4);
 					f.seekRelative(8);
@@ -343,7 +343,7 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 			char *p=buf;
 			int t=0;
 			while (p<buf+size) {
-				string path(p);
+				std::string path(p);
 				p+=strlen(p)+1;
 				fixname(path);
 
@@ -369,7 +369,7 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 			buf[size] = 0;
 			char *p=buf;
 			while (p<buf+size) {
-				string path(p);
+				std::string path(p);
 				p+=strlen(p)+1;
 				fixname(path);
 
@@ -424,7 +424,7 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 			*/
 			// model instance data
 			nMDX = (int)size / 36;
-			for (int i=0; i<nMDX; i++) {
+			for (size_t i=0; i<nMDX; i++) {
 				int id;
 				f.read(&id, 4);
 				Model *model = (Model*)gWorld->modelmanager.items[gWorld->modelmanager.get(models[id])];
@@ -474,7 +474,7 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 			*/
 			// wmo instance data
 			nWMO = (int)size / 64;
-			for (int i=0; i<nWMO; i++) {
+			for (size_t i=0; i<(size_t)nWMO; i++) {
 				int id;
 				f.read(&id, 4);
 				WMO *wmo = (WMO*)gWorld->wmomanager.items[gWorld->wmomanager.get(wmos[id])];
@@ -487,8 +487,7 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 			struct WaterTile *mh2oh;
 			struct WaterLayer *mh2oi;
 
-			for(size_t i=0; i<CHUNKS_IN_TILE*CHUNKS_IN_TILE;i++)
-			{ // 256*12=3072 bytes
+			for(size_t i=0; i<CHUNKS_IN_TILE*CHUNKS_IN_TILE;i++) { // 256*12=3072 bytes
 				//SWaterTile waterTile;
 
 				mh2oh = (struct WaterTile *)abuf;
@@ -500,8 +499,7 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 					mh2oh->layerCount,
 					0x86fa + mh2oh->ofsVisibilityMask);
 
-				for( unsigned j = 0; j < mh2oh->layerCount; j++ )
-				{
+				for (size_t j = 0; j < mh2oh->layerCount; j++ ) {
 					mh2oi = (struct WaterLayer *) (f.getPointer()+mh2oh->ofsLayer + sizeof( WaterLayer ) * j );
 					SWaterLayer waterLayer;
 					//memcpy( waterTile.quadmask, f.getPointer()+mh2oh->ofsVisibilityMask, 16 );
@@ -547,15 +545,12 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 							co++;
 						memcpy( waterLayer.mask, f.getPointer() + mh2oi->ofsDisplayMask, co );
 
-						for( unsigned j = 0; j < waterLayer.w * waterLayer.h; j++ )
+						for (size_t k = 0; k < (size_t)(waterLayer.w * waterLayer.h); k++ )
 						{
-							if( getBitL2H( waterLayer.mask, j ) )		
-							{
-								waterLayer.renderTiles.push_back( true );
-							}
-							else
-							{
-								waterLayer.renderTiles.push_back( false );
+							if (getBitL2H(waterLayer.mask, (unsigned int)k)){
+								waterLayer.renderTiles.push_back(true);
+							}else{
+								waterLayer.renderTiles.push_back(false);
 							}
 						}
 					}
@@ -563,7 +558,7 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 					if( mh2oi->ofsHeigthAlpha != 0 && mh2oi->flags == 2 && mh2oi->type == 2 )
 					{
 						unsigned char* pUnknowns = (unsigned char*)f.getPointer()+mh2oi->ofsHeigthAlpha;
-						for( unsigned g = 0; g < (mh2oi->w + 1) * (mh2oi->h + 1); g++ )
+						for (size_t g = 0; g < (size_t)((mh2oi->w + 1) * (mh2oi->h + 1)); g++ )
 						{
 							waterLayer.alphas.push_back( pUnknowns[g] );
 						}
@@ -572,7 +567,7 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 					{
 						float* pHeights = (float*)(f.getPointer()+mh2oi->ofsHeigthAlpha);
 						unsigned char* pUnknowns = (unsigned char*)f.getPointer()+mh2oi->ofsHeigthAlpha + sizeof( float ) * (mh2oi->w + 1) * (mh2oi->h + 1);
-						for( unsigned g = 0; g < (mh2oi->w + 1) * (mh2oi->h + 1); g++ )
+						for (size_t g = 0; g < (size_t)((mh2oi->w + 1) * (mh2oi->h + 1)); g++ )
 						{
 							waterLayer.heights.push_back( pHeights[g] );
 							waterLayer.alphas.push_back( pUnknowns[g] );
@@ -582,7 +577,7 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 					{
 						float* pHeights = (float*)(f.getPointer()+mh2oi->ofsHeigthAlpha);
 						//unsigned char* pUnknowns = (unsigned char*)f.getPointer()+mh2oi->ofsHeigthAlpha + sizeof( float ) * (mh2oi->w + 1) * (mh2oi->h + 1);
-						for( unsigned g = 0; g < (mh2oi->w + 1) * (mh2oi->h + 1); g++ )
+						for (size_t g = 0; g < (size_t)((mh2oi->w + 1) * (mh2oi->h + 1)); g++ )
 						{
 							waterLayer.heights.push_back( pHeights[g] );
 							//waterLayer.alphas.push_back( pUnknowns[g] );
@@ -638,8 +633,8 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 	}
 
 	// read individual map chunks
-	for (int j=0; j<CHUNKS_IN_TILE; j++) {
-		for (int i=0; i<CHUNKS_IN_TILE; i++) {
+	for (size_t j=0; j<CHUNKS_IN_TILE; j++) {
+		for (size_t i=0; i<CHUNKS_IN_TILE; i++) {
 			if (mcnk_offsets[j*CHUNKS_IN_TILE+i] == 0 || mcnk_sizes[j*CHUNKS_IN_TILE+i] == 0) {
 				continue;
 			}
@@ -662,8 +657,8 @@ MapTile::~MapTile()
 
 	topnode.cleanup();
 
-	for (int j=0; j<CHUNKS_IN_TILE; j++) {
-		for (int i=0; i<CHUNKS_IN_TILE; i++) {
+	for (size_t j=0; j<CHUNKS_IN_TILE; j++) {
+		for (size_t i=0; i<CHUNKS_IN_TILE; i++) {
 			chunks[j][i].destroy();
 		}
 	}
@@ -686,8 +681,8 @@ void MapTile::draw()
 	if (!ok) return;
 
 
-	for (int j=0; j<CHUNKS_IN_TILE; j++) {
-		for (int i=0; i<CHUNKS_IN_TILE; i++) {
+	for (size_t j=0; j<CHUNKS_IN_TILE; j++) {
+		for (size_t i=0; i<CHUNKS_IN_TILE; i++) {
 			chunks[j][i].visible = false;
 			chunks[j][i].draw();
 		}
@@ -701,8 +696,8 @@ void MapTile::drawWater()
 {
 	if (!ok) return;
 
-	for (int j=0; j<CHUNKS_IN_TILE; j++) {
-		for (int i=0; i<CHUNKS_IN_TILE; i++) {
+	for (size_t j=0; j<CHUNKS_IN_TILE; j++) {
+		for (size_t i=0; i<CHUNKS_IN_TILE; i++) {
 			if (chunks[j][i].visible) 
 				chunks[j][i].drawWater();
 		}
@@ -713,7 +708,7 @@ void MapTile::drawObjects()
 {
 	if (!ok) return;
 
-	for (int i=0; i<nWMO; i++) {
+	for (size_t i=0; i<nWMO; i++) {
 		wmois[i].draw();
 	}
 }
@@ -722,7 +717,7 @@ void MapTile::drawSky()
 {
 	if (!ok) return;
 
-	for (int i=0; i<nWMO; i++) {
+	for (size_t i=0; i<nWMO; i++) {
 		wmois[i].wmo->drawSkybox();
 		if (gWorld->hadSky) break;
 	}
@@ -743,7 +738,7 @@ void MapTile::drawModels()
 {
 	if (!ok) return;
 
-	for (int i=0; i<nMDX; i++) {
+	for (size_t i=0; i<nMDX; i++) {
 		modelis[i].draw();
 	}
 }
@@ -1373,7 +1368,8 @@ void MapChunk::init(MapTile* mt, MPQFile &f, bool bigAlpha)
 	glBindBufferARB(GL_ARRAY_BUFFER_ARB, normals);
 	glBufferDataARB(GL_ARRAY_BUFFER_ARB, mapbufsize*3*sizeof(float), tn, GL_STATIC_DRAW_ARB);
 
-	if (hasholes) initStrip(holes);
+	if (hasholes)
+		initStrip(holes);
 	/*
 	else {
 	strip = gWorld->mapstrip;

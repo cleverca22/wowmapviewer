@@ -261,7 +261,7 @@ bool WINAPI SFileOpenArchive(
     if(nError == ERROR_SUCCESS)
     {
         // Dump the header
-//      DumpMpqHeader(ha->pHeader);
+        DumpMpqHeader(ha->pHeader);
 
         // W3x Map Protectors use the fact that War3's Storm.dll ignores the MPQ user data,
         // and probably ignores the MPQ format version as well. The trick is to
@@ -295,6 +295,12 @@ bool WINAPI SFileOpenArchive(
     // has compressed block table and hash table.
     if(nError == ERROR_SUCCESS)
     {
+        //
+        // Note: We will NOT check if the hash table is properly decrypted.
+        // Some MPQ protectors corrupt the hash table by rewriting part of it.
+        // Hash table, the way how it works, allows arbitrary values for unused entries.
+        // 
+
         nError = LoadHashTable(ha);
     }
 
@@ -302,12 +308,6 @@ bool WINAPI SFileOpenArchive(
     if(nError == ERROR_SUCCESS)
     {
         nError = LoadHetTable(ha);
-    }
-
-    // If the MPQ has neither hash or block table, we create a default one
-    if(nError == ERROR_SUCCESS && ha->pHashTable == NULL && ha->pHetTable == NULL)
-    {
-        nError = CreateHashTable(ha, HASH_TABLE_SIZE_DEFAULT);
     }
 
     // Now, build the file table. It will be built by combining

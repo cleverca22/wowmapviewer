@@ -11,7 +11,7 @@ public:
 	~DBCFile();
 
 	// Open database. It must be openened before it can be used.
-	void open();
+	bool open();
 
 	// Database exceptions
 	class Exception
@@ -36,6 +36,12 @@ public:
 	class Record
 	{
 	public:
+		Record& operator= (const Record& r)
+		{
+            file = r.file;
+			offset = r.offset;
+			return *this;
+		}
 		float getFloat(size_t field) const
 		{
 			assert(field < file.fieldCount);
@@ -44,17 +50,24 @@ public:
 		unsigned int getUInt(size_t field) const
 		{
 			assert(field < file.fieldCount);
-			return *reinterpret_cast<unsigned int*>(offset+field*4);
+			return *reinterpret_cast<unsigned int*>(offset+(field*4));
 		}
 		int getInt(size_t field) const
 		{
 			assert(field < file.fieldCount);
 			return *reinterpret_cast<int*>(offset+field*4);
 		}
+		unsigned char getByte(size_t ofs) const
+		{
+			assert(ofs < file.recordSize);
+			return *reinterpret_cast<unsigned char*>(offset+ofs);
+		}
 		const char *getString(size_t field) const
 		{
 			assert(field < file.fieldCount);
 			size_t stringOffset = getUInt(field);
+			if (stringOffset >= file.stringSize)
+				stringOffset = 0;
 			assert(stringOffset < file.stringSize);
 			return reinterpret_cast<char*>(file.stringTable + stringOffset);
 		}
@@ -78,12 +91,12 @@ public:
 			return reinterpret_cast<char*>( file.stringTable + stringOffset );
 		}
 	private:
-		Record(DBCFile &file, unsigned char *offset): file(file), offset(offset) {}
-		unsigned char *offset;
 		DBCFile &file;
+		unsigned char *offset;
+		Record(DBCFile &file, unsigned char *offset): file(file), offset(offset) {}
 
 		friend class DBCFile;
-		friend class DBCFile::Iterator;
+		friend class Iterator;
 	};
 	/** Iterator that iterates over records
 	*/

@@ -31,8 +31,12 @@
 
   // In MSVC 8.0, there are some functions declared as deprecated.
   #if _MSC_VER >= 1400
-  #define _CRT_SECURE_NO_DEPRECATE
-  #define _CRT_NON_CONFORMING_SWPRINTFS
+    #ifndef _CRT_SECURE_NO_DEPRECATE
+      #define _CRT_SECURE_NO_DEPRECATE
+    #endif
+    #ifndef _CRT_NON_CONFORMING_SWPRINTFS
+      #define _CRT_NON_CONFORMING_SWPRINTFS
+    #endif
   #endif
 
   #include <assert.h>      
@@ -59,7 +63,9 @@
   #include <Carbon/Carbon.h> // Mac OS X
   
   #define    PKEXPORT
+  #ifndef    __SYS_ZLIB
   #define    __SYS_ZLIB
+  #endif
   #define    __SYS_BZLIB
 
   #ifndef __BIG_ENDIAN__

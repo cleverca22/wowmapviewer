@@ -2,11 +2,14 @@
 #include "world.h"
 #include <cassert>
 #include <algorithm>
+#include "util.h"
 
 int globalTime = 0;
 
 Model::Model(std::string name, bool forceAnim) : ManagedItem(name), forceAnim(forceAnim)
 {
+	if (name == "")
+		return;
 	// replace .MDX with .M2
 	char tempname[256];
 	strncpy(tempname,name.c_str(), sizeof(tempname));
@@ -60,7 +63,7 @@ Model::Model(std::string name, bool forceAnim) : ManagedItem(name), forceAnim(fo
 	particleSystems = 0;
 	ribbons = 0;
 	if (header.nGlobalSequences) {
-		globalSequences = new int[header.nGlobalSequences];
+		globalSequences = new uint32[header.nGlobalSequences];
 		memcpy(globalSequences, (f.getBuffer() + header.ofsGlobalSequences), header.nGlobalSequences * 4);
 	}
 
@@ -889,7 +892,7 @@ void TextureAnim::setup(int anim)
 	}
 }
 
-void ModelCamera::init(MPQFile &f, ModelCameraDef &mcd, int *global)
+void ModelCamera::init(MPQFile &f, ModelCameraDef &mcd, uint32 *global)
 {
 	ok = true;
     nearclip = mcd.nearclip;
@@ -924,18 +927,18 @@ void ModelCamera::setup(int time)
 	//glRotatef(roll, 0, 0, 1);
 }
 
-void ModelColor::init(MPQFile &f, ModelColorDef &mcd, int *global)
+void ModelColor::init(MPQFile &f, ModelColorDef &mcd, uint32 *global)
 {
 	color.init(mcd.color, f, global);
 	opacity.init(mcd.opacity, f, global);
 }
 
-void ModelTransparency::init(MPQFile &f, ModelTransDef &mcd, int *global)
+void ModelTransparency::init(MPQFile &f, ModelTransDef &mcd, uint32 *global)
 {
 	trans.init(mcd.trans, f, global);
 }
 
-void ModelLight::init(MPQFile &f, ModelLightDef &mld, int *global)
+void ModelLight::init(MPQFile &f, ModelLightDef &mld, uint32 *global)
 {
 	tpos = pos = fixCoordSystem(mld.pos);
 	tdir = dir = Vec3D(0,1,0); // no idea
@@ -969,14 +972,14 @@ void ModelLight::setup(int time, GLuint l)
 	glEnable(l);
 }
 
-void TextureAnim::init(MPQFile &f, ModelTexAnimDef &mta, int *global)
+void TextureAnim::init(MPQFile &f, ModelTexAnimDef &mta, uint32 *global)
 {
 	trans.init(mta.trans, f, global);
 	rot.init(mta.rot, f, global);
 	scale.init(mta.scale, f, global);
 }
 
-void Bone::init(MPQFile &f, ModelBoneDef &b, int *global, MPQFile *animfiles)
+void Bone::init(MPQFile &f, ModelBoneDef &b, uint32 *global, MPQFile *animfiles)
 {
 	parent = b.parent;
 	pivot = fixCoordSystem(b.pivot);

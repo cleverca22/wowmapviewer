@@ -8,8 +8,8 @@
 /// XXX this really needs to be refactored into a singleton class
 
 #define APP_TITLE "WoW Map Viewer"
-
-#define APP_VERSION "v0.7 (Chuanhsing) r20"
+#define APP_VERSION "v0.7.0.0"
+#define APP_BUILD "r20"
 
 
 extern std::vector<AppState*> gStates;

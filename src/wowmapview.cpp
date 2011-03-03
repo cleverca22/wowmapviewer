@@ -13,6 +13,7 @@
 #include <ctime>
 #include <cstdlib>
 
+#include "util.h"
 #include "mpq.h"
 #include "video.h"
 #include "appstate.h"
@@ -26,9 +27,6 @@ int fullscreen = 0;
 
 std::vector<AppState*> gStates;
 bool gPop = false;
-
-char gamepath[1024];
-
 
 float gFPS;
 
@@ -52,65 +50,6 @@ void deleteFonts()
 	delete f16;
 	delete f24;
 	delete f32;
-}
-
-
-
-FILE *flog;
-bool glogfirst = true;
-
-
-void gLog(char *str, ...)
-{
-	if (glogfirst) {
-		flog = fopen("log.txt","w");
-		fclose(flog);
-		glogfirst = false;
-	}
-
-	flog = fopen("log.txt","a");
-
-	va_list ap;
-
-	va_start (ap, str);
-	vfprintf (flog, str, ap);
-	va_end (ap);
-
-	fclose(flog);
-}
-
-
-void getGamePath()
-{
-#ifdef _WIN32
-	HKEY key;
-	DWORD t,s;
-	LONG l;
-	s = 1024;
-	memset(gamepath,0,s);
-	l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\World of Warcraft\\Beta",0,KEY_QUERY_VALUE,&key);
-	if (l != ERROR_SUCCESS)
-		l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\World of Warcraft\\PTR",0,KEY_QUERY_VALUE,&key);
-	if (l != ERROR_SUCCESS)
-		l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\World of Warcraft",0,KEY_QUERY_VALUE,&key);
-	if (l == ERROR_SUCCESS) {
-		l = RegQueryValueEx(key,"InstallPath",0,&t,(LPBYTE)gamepath,&s);
-		RegCloseKey(key);
-		strcat(gamepath,"Data\\");
-	}
-#else
-	strcpy(gamepath,"data/");
-#endif
-}
-
-int file_exists(char *path)
-{
-	FILE *f = fopen(path, "r");
-	if (f) {
-		fclose(f);
-		return true;
-	}
-	return false;
 }
 
 int main(int argc, char *argv[])
@@ -163,7 +102,7 @@ int main(int argc, char *argv[])
 
 	getGamePath();
 
-	gLog(APP_TITLE " " APP_VERSION "\nGame path: %s\n", gamepath);
+	gLog(APP_TITLE " " APP_VERSION " " APP_BUILD "\nGame path: %s\n", gamePath.c_str());
 
 	std::vector<MPQArchive*> archives;
 	
@@ -173,7 +112,7 @@ int main(int argc, char *argv[])
 
 	char path[512];
 	for (size_t i=0; i<9; i++) {
-		sprintf(path, "%s%s\\base-%s.MPQ", gamepath, locales[i], locales[i]);
+		sprintf(path, "%s%s\\base-%s.MPQ", gamePath.c_str(), locales[i], locales[i]);
 		if (file_exists(path)) {
 			langID = i;
 			break;
@@ -184,39 +123,39 @@ int main(int argc, char *argv[])
 	if (usePatch) {
 		// patch goes first -> fake priority handling
 /*
-		sprintf(path, "%s%s", gamepath, "patch-3.MPQ");
+		sprintf(path, "%s%s", gamePath.c_str(), "patch-3.MPQ");
 		archives.push_back(new MPQArchive(path));
 
-		sprintf(path, "%s%s", gamepath, "patch-2.MPQ");
+		sprintf(path, "%s%s", gamePath.c_str(), "patch-2.MPQ");
 		archives.push_back(new MPQArchive(path));
 
-		sprintf(path, "%s%s", gamepath, "patch.MPQ");
+		sprintf(path, "%s%s", gamePath.c_str(), "patch.MPQ");
 		archives.push_back(new MPQArchive(path));
 
-		sprintf(path, "%s%s\\Patch-%s-2.MPQ", gamepath, locales[langID], locales[langID]);
+		sprintf(path, "%s%s\\Patch-%s-2.MPQ", gamePath.c_str(), locales[langID], locales[langID]);
 		archives.push_back(new MPQArchive(path));
 
-		sprintf(path, "%s%s\\Patch-%s.MPQ", gamepath, locales[langID], locales[langID]);
+		sprintf(path, "%s%s\\Patch-%s.MPQ", gamePath.c_str(), locales[langID], locales[langID]);
 		archives.push_back(new MPQArchive(path));
 */
 	}
 
 	const char* archiveNames[] = {"expansion3.MPQ", "expansion2.MPQ", "expansion1.MPQ", "world.MPQ", "sound.MPQ", "art.MPQ"};
 	for (size_t i=0; i<6; i++) {
-		sprintf(path, "%s%s", gamepath, archiveNames[i]);
+		sprintf(path, "%s%s", gamePath.c_str(), archiveNames[i]);
 		archives.push_back(new MPQArchive(path));
 	}
 
-	sprintf(path, "%s%s\\expansion3-locale-%s.MPQ", gamepath, locales[langID], locales[langID]);
+	sprintf(path, "%s%s\\expansion3-locale-%s.MPQ", gamePath.c_str(), locales[langID], locales[langID]);
 	archives.push_back(new MPQArchive(path));
 
-	sprintf(path, "%s%s\\expansion2-locale-%s.MPQ", gamepath, locales[langID], locales[langID]);
+	sprintf(path, "%s%s\\expansion2-locale-%s.MPQ", gamePath.c_str(), locales[langID], locales[langID]);
 	archives.push_back(new MPQArchive(path));
 
-	sprintf(path, "%s%s\\expansion1-locale-%s.MPQ", gamepath, locales[langID], locales[langID]);
+	sprintf(path, "%s%s\\expansion1-locale-%s.MPQ", gamePath.c_str(), locales[langID], locales[langID]);
 	archives.push_back(new MPQArchive(path));
 
-	sprintf(path, "%s%s\\locale-%s.MPQ", gamepath, locales[langID], locales[langID]);
+	sprintf(path, "%s%s\\locale-%s.MPQ", gamePath.c_str(), locales[langID], locales[langID]);
 	archives.push_back(new MPQArchive(path));
 
 	OpenDBs();

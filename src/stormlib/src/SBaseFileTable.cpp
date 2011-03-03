@@ -1186,7 +1186,7 @@ static TMPQBetTable * TranslateBetTable(
                 pbSrcData += BetHeader.dwBetHashArraySize;
 
                 // Dump both tables
-//              DumpHetAndBetTable(ha->pHetTable, pBetTable);
+                DumpHetAndBetTable(ha->pHetTable, pBetTable);
             }
         }
     }
@@ -1921,72 +1921,56 @@ static int BuildFileTable_HetBet(
     return nError;
 }
 
-int CreateHashTable(TMPQArchive * ha, DWORD dwHashTableSize)
-{
-    TMPQHash * pHashTable;
-
-    // Sanity checks
-    assert((dwHashTableSize & (dwHashTableSize - 1)) == 0);
-    assert(ha->pHashTable == NULL);
-
-    // Create the hash table
-    pHashTable = ALLOCMEM(TMPQHash, dwHashTableSize);
-    if(pHashTable == NULL)
-        return ERROR_NOT_ENOUGH_MEMORY;
-
-    // Fill it
-    memset(pHashTable, 0xFF, dwHashTableSize * sizeof(TMPQHash));
-    ha->dwMaxFileCount = dwHashTableSize;
-    ha->pHashTable = pHashTable;
-    return ERROR_SUCCESS;
-}
-
 int LoadHashTable(TMPQArchive * ha)
 {
     TMPQHeader * pHeader = ha->pHeader;
     ULONGLONG ByteOffset;
     TMPQHash * pHashTable;
+    DWORD dwHashTableSize = pHeader->dwHashTableSize;
     DWORD dwTableSize;
-    DWORD dwCmpSize;
     int nError;
 
     // If the MPQ has no hash table, do nothing
     if(pHeader->dwHashTablePos == 0 && pHeader->wHashTablePosHi == 0)
         return ERROR_SUCCESS;
 
-    // If the hash table size is zero, do nothing
-    if(pHeader->dwHashTableSize == 0)
-        return ERROR_SUCCESS;
+    // If the hash table size is zero, we treat the MPQ as unfinished
+    // and set an initial table size.
+    if(dwHashTableSize == 0)
+        dwHashTableSize = HASH_TABLE_SIZE_DEFAULT;
+    dwTableSize = dwHashTableSize * sizeof(TMPQHash);
 
     // Allocate buffer for the hash table
-    dwTableSize = pHeader->dwHashTableSize * sizeof(TMPQHash);
-    pHashTable = ALLOCMEM(TMPQHash, pHeader->dwHashTableSize);
+    pHashTable = ALLOCMEM(TMPQHash, dwHashTableSize);
     if(pHashTable == NULL)
         return ERROR_NOT_ENOUGH_MEMORY;
 
-    // Compressed size of the hash table
-    dwCmpSize = (DWORD)pHeader->HashTableSize64;
-
-    // 
-    // Load the table from the MPQ, with decompression
-    //
-    // Note: We will NOT check if the hash table is properly decrypted.
-    // Some MPQ protectors corrupt the hash table by rewriting part of it.
-    // Hash table, the way how it works, allows arbitrary values for unused entries.
-    // 
-
-    ByteOffset = ha->MpqPos + MAKE_OFFSET64(pHeader->wHashTablePosHi, pHeader->dwHashTablePos);
-    nError = LoadMpqTable(ha, ByteOffset, pHashTable, dwCmpSize, dwTableSize, MPQ_KEY_HASH_TABLE);
-    if(nError != ERROR_SUCCESS)
+    // Load the hash table, if there is any
+    if(pHeader->dwHashTableSize != 0)
     {
-        FREEMEM(pHashTable);
-        pHashTable = NULL;
-        return nError;
+        // Compressed size of the hash table
+        DWORD dwCmpSize = (DWORD)pHeader->HashTableSize64;
+
+        // Load the table from the MPQ, with decompression
+        ByteOffset = ha->MpqPos + MAKE_OFFSET64(pHeader->wHashTablePosHi, pHeader->dwHashTablePos);
+        nError = LoadMpqTable(ha, ByteOffset, pHashTable, dwCmpSize, dwTableSize, MPQ_KEY_HASH_TABLE);
+        if(nError != ERROR_SUCCESS)
+        {
+            FREEMEM(pHashTable);
+            pHashTable = NULL;
+            return nError;
+        }
+    }
+    else
+    {
+        // Make the hash table empty
+        memset(pHashTable, 0xFF, dwTableSize);
+        pHeader->dwHashTableSize = dwHashTableSize;
     }
 
     // Set the maximum file count to the size of the hash table
     // Store the hash table to the MPQ
-    ha->dwMaxFileCount = pHeader->dwHashTableSize;
+    ha->dwMaxFileCount = dwHashTableSize;
     ha->pHashTable = pHashTable;
     return ERROR_SUCCESS;
 }

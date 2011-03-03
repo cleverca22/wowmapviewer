@@ -5,7 +5,7 @@
 #include <SDL_opengl.h>
 #include <map>
 
-#ifndef _WIN32
+#ifndef _WINDOWS
 #include <stdarg.h>
 #endif
 
@@ -13,6 +13,7 @@
 
 #include "manager.h"
 #include "font.h"
+#include "ddslib.h"
 
 #define PI 3.14159265358f
 

@@ -90,7 +90,8 @@ const int mapbufsize = 9*9 + 8*8;
 class MapNode {
 public:
 
-	MapNode(int x, int y, int s):px(x),py(y),size(s),mt(0), vmin(0), vmax(0), vcenter(0) 
+	MapNode(int x, int y, int s)
+		:px(x), py(y), size(s), vmin(0), vmax(0), vcenter(0), mt(0)
 	{
 		for(int i=0; i<4; i++)
 			children[i] = 0;
@@ -118,7 +119,7 @@ public:
 	bool mBigAlpha;
 	MapChunkHeader header;
 
-	unsigned int areaID;
+	int areaID;
 
 	std::vector<GLuint> wTextures;
 	void initTextures(char *basename, int first, int last);
@@ -175,8 +176,8 @@ public:
 
 	std::vector<WMOInstance> wmois;
 	std::vector<ModelInstance> modelis;
-	int nWMO;
-	int nMDX;
+	size_t nWMO;
+	size_t nMDX;
 
 	int x, z;
 	bool ok;

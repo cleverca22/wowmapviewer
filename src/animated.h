@@ -107,7 +107,7 @@ class Animated {
 public:
 
 	int type, seq;
-	int *globals;
+	uint32 *globals;
 
 	std::vector<int> times[MAX_ANIMATED];
 	std::vector<T> data[MAX_ANIMATED];
@@ -176,7 +176,7 @@ public:
 		}
 	}
 
-	void init(AnimationBlock &b, MPQFile &f, int *gs)
+	void init(AnimationBlock &b, MPQFile &f, uint32 *gs)
 	{
 		globals = gs;
 		type = b.type;
@@ -226,7 +226,7 @@ public:
 		}
 	}
 
-	void init(AnimationBlock &b, MPQFile &f, int *gs, MPQFile *animfiles)
+	void init(AnimationBlock &b, MPQFile &f, uint32 *gs, MPQFile *animfiles)
 	{
 		globals = gs;
 		type = b.type;
