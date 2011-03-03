@@ -2,6 +2,12 @@
   StormLib history
   ================
 
+ Version 8.01
+
+ - SFileFindFirstFile and SFileFindNextFile no longer find files that have
+   patch file in the oldest MPQ in the patch chain
+ - Write support for MPQs version 4
+
  Version 8.00
 
  - Updated support for protected maps from Warcraft III

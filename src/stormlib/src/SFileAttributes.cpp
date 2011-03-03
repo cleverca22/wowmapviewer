@@ -33,6 +33,7 @@ typedef struct _MPQ_ATTRIBUTES_HEADER
 int SAttrLoadAttributes(TMPQArchive * ha)
 {
     MPQ_ATTRIBUTES_HEADER AttrHeader;
+    TMPQFile * hf;
     HANDLE hFile = NULL;
     DWORD dwBlockTableSize = ha->pHeader->dwBlockTableSize;
     DWORD dwArraySize;
@@ -40,14 +41,17 @@ int SAttrLoadAttributes(TMPQArchive * ha)
     DWORD i;
     int nError = ERROR_SUCCESS;
 
-    // Hash table must exist, and file table must be initialized
-    assert(ha->pHashTable != NULL);
+    // File table must be initialized
     assert(ha->pFileTable != NULL);
 
     // Attempt to open the "(attributes)" file.
     // If it's not there, then the archive doesn't support attributes
     if(SFileOpenFileEx((HANDLE)ha, ATTRIBUTES_NAME, SFILE_OPEN_ANY_LOCALE, &hFile))
     {
+        // Remember the flags for (attributes)
+        hf = (TMPQFile *)hFile;
+        ha->dwFileFlags2 = hf->pFileEntry->dwFlags;
+
         // Load the content of the attributes file
         SFileReadFile(hFile, &AttrHeader, sizeof(MPQ_ATTRIBUTES_HEADER), &dwBytesRead, NULL);
         AttrHeader.dwVersion = BSWAP_INT32_UNSIGNED(AttrHeader.dwVersion);
@@ -204,11 +208,12 @@ int SAttrFileSaveToMpq(TMPQArchive * ha)
     }
 
     // Create the attributes file in the MPQ
+    assert(ha->dwFileFlags2 != 0);
     nError = SFileAddFile_Init(ha, ATTRIBUTES_NAME,
                                    NULL,
                                    dwFileSize,
                                    LANG_NEUTRAL,
-                                   MPQ_FILE_COMPRESS | MPQ_FILE_REPLACEEXISTING,
+                                   ha->dwFileFlags2,
                                   &hf);
 
     // Write all parts of the (attributes) file
@@ -275,7 +280,10 @@ int SAttrFileSaveToMpq(TMPQArchive * ha)
 
     // Finalize the file in the archive
     if(hf != NULL)
+    {
         SFileAddFile_Finish(hf);
+        ha->dwFlags |= MPQ_FLAG_ATTRIBS_VALID;
+    }
 
     return nError;
 }

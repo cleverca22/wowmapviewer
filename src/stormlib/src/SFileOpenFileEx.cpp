@@ -61,9 +61,15 @@ bool OpenPatchedFile(HANDLE hMpq, const char * szFileName, DWORD dwReserved, HAN
         // Construct the name of the patch file
         strcpy(szPatchFileName, ha->szPatchPrefix);
         strcat(szPatchFileName, szFileName);
-        if(SFileOpenFileEx((HANDLE)ha, szPatchFileName, SFILE_OPEN_FROM_MPQ, phFile))
+        if(SFileOpenFileEx((HANDLE)ha, szPatchFileName, SFILE_OPEN_FROM_MPQ, (HANDLE *)&hfBase))
         {
-            hfBase = (TMPQFile *)(*phFile);
+            //
+            // The following scenario is possible:
+            // 1) Base MPQ file doesn't contain the desired file
+            // 2) First patch MPQ contains the file with MPQ_FILE_PATCH_FILE
+            // 3) Second patch contains full version of the file   
+            //
+
             break;
         }
 
@@ -83,7 +89,7 @@ bool OpenPatchedFile(HANDLE hMpq, const char * szFileName, DWORD dwReserved, HAN
     if(hf->pFileEntry->dwFlags & MPQ_FILE_PATCH_FILE)
     {
         FreeMPQFile(hf);
-        SetLastError(ERROR_FILE_NOT_FOUND);
+        SetLastError(ERROR_BASE_FILE_MISSING);
         return false;
     }
     
@@ -106,7 +112,7 @@ bool OpenPatchedFile(HANDLE hMpq, const char * szFileName, DWORD dwReserved, HAN
             if((hfPatch->pFileEntry->dwFlags & MPQ_FILE_PATCH_FILE) == 0)
                 hfLast = hfPatch;
 
-            // Set current patch tobase file and move on
+            // Set current patch to base file and move on
             hf->hfPatchFile = hfPatch;
             hf = hfPatch;
         }
@@ -383,10 +389,7 @@ bool WINAPI SFileOpenFileEx(HANDLE hMpq, const char * szFileName, DWORD dwSearch
 
         hf->MpqFilePos   = pFileEntry->ByteOffset;
         hf->RawFilePos   = ha->MpqPos + hf->MpqFilePos;
-
         hf->dwDataSize   = pFileEntry->dwFileSize;
-        hf->dwHashIndex  = pFileEntry->dwHashIndex;
-        hf->dwBlockIndex = (DWORD)(pFileEntry - ha->pFileTable);
 
         // If the MPQ has sector CRC enabled, enable if for the file
         if(ha->dwFlags & MPQ_FLAG_CHECK_SECTOR_CRC)
@@ -414,7 +417,7 @@ bool WINAPI SFileOpenFileEx(HANDLE hMpq, const char * szFileName, DWORD dwSearch
     // If the file is actually a patch file, we have to load the patch file header
     if(nError == ERROR_SUCCESS && pFileEntry->dwFlags & MPQ_FILE_PATCH_FILE)
     {
-        assert(hf->PatchInfo == NULL);
+        assert(hf->pPatchInfo == NULL);
         nError = AllocatePatchInfo(hf, true);
     }
 

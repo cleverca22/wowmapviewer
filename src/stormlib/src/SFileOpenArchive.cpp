@@ -56,19 +56,28 @@ static int VerifyMpqTablePositions(TMPQArchive * ha, ULONGLONG FileSize)
     }
 
     // Check the begin of hash table
-    ByteOffset = ha->MpqPos + MAKE_OFFSET64(pHeader->wHashTablePosHi, pHeader->dwHashTablePos);
-    if(ByteOffset > FileSize)
-        return ERROR_BAD_FORMAT;
+    if(pHeader->wHashTablePosHi || pHeader->dwHashTablePos)
+    {
+        ByteOffset = ha->MpqPos + MAKE_OFFSET64(pHeader->wHashTablePosHi, pHeader->dwHashTablePos);
+        if(ByteOffset > FileSize)
+            return ERROR_BAD_FORMAT;
+    }
 
     // Check the begin of block table
-    ByteOffset = ha->MpqPos + MAKE_OFFSET64(pHeader->wBlockTablePosHi, pHeader->dwBlockTablePos);
-    if(ByteOffset > FileSize)
-        return ERROR_BAD_FORMAT;
+    if(pHeader->wBlockTablePosHi || pHeader->dwBlockTablePos)
+    {
+        ByteOffset = ha->MpqPos + MAKE_OFFSET64(pHeader->wBlockTablePosHi, pHeader->dwBlockTablePos);
+        if(ByteOffset > FileSize)
+            return ERROR_BAD_FORMAT;
+    }
 
     // Check the begin of hi-block table
-    ByteOffset = ha->MpqPos + pHeader->HiBlockTablePos64;
-    if(ByteOffset > FileSize)
-        return ERROR_BAD_FORMAT;
+    if(pHeader->HiBlockTablePos64 != 0)
+    {
+        ByteOffset = ha->MpqPos + pHeader->HiBlockTablePos64;
+        if(ByteOffset > FileSize)
+            return ERROR_BAD_FORMAT;
+    }
 
     // All OK.
     return ERROR_SUCCESS;
@@ -82,6 +91,19 @@ static int VerifyMpqTablePositions(TMPQArchive * ha, ULONGLONG FileSize)
 //-----------------------------------------------------------------------------
 // SFileGetLocale and SFileSetLocale
 // Set the locale for all newly opened files
+
+DWORD WINAPI SFileGetGlobalFlags()
+{
+    return dwGlobalFlags;
+}
+
+DWORD WINAPI SFileSetGlobalFlags(DWORD dwNewFlags)
+{
+    DWORD dwOldFlags = dwGlobalFlags;
+
+    dwGlobalFlags = dwNewFlags;
+    return dwOldFlags;
+}
 
 LCID WINAPI SFileGetLocale()
 {
@@ -238,6 +260,9 @@ bool WINAPI SFileOpenArchive(
     // Fix table positions according to format
     if(nError == ERROR_SUCCESS)
     {
+        // Dump the header
+//      DumpMpqHeader(ha->pHeader);
+
         // W3x Map Protectors use the fact that War3's Storm.dll ignores the MPQ user data,
         // and probably ignores the MPQ format version as well. The trick is to
         // fake MPQ format 2, with an improper hi-word position of hash table and block table
@@ -254,6 +279,10 @@ bool WINAPI SFileOpenArchive(
         if(dwFlags & (MPQ_OPEN_NO_LISTFILE | MPQ_OPEN_NO_ATTRIBUTES))
             ha->dwFlags |= MPQ_FLAG_READ_ONLY;
 
+        // Set the default file flags for (listfile) and (attributes)
+        ha->dwFileFlags1 =
+        ha->dwFileFlags2 = MPQ_FILE_ENCRYPTED | MPQ_FILE_COMPRESS |  MPQ_FILE_REPLACEEXISTING;
+
         // Set the size of file sector
         ha->dwSectorSize = (0x200 << ha->pHeader->wSectorSize);
 
@@ -266,31 +295,29 @@ bool WINAPI SFileOpenArchive(
     // has compressed block table and hash table.
     if(nError == ERROR_SUCCESS)
     {
-        //
-        // Note: We will not check if the hash table is properly decrypted.
-        // Some MPQ protectors corrupt the hash table by rewriting part of it.
-        // Hash table, the way how it works, allows arbitrary values for unused entries.
-        // 
-
         nError = LoadHashTable(ha);
     }
 
-    // Read Het and Bet tables, if they are present
+    // Read HET table, if present
     if(nError == ERROR_SUCCESS)
     {
-        nError = LoadHetAndBetTable(ha);
-        if(ha->pHetTable || ha->pBetTable)
-            ha->dwFlags |= MPQ_FLAG_READ_ONLY;
+        nError = LoadHetTable(ha);
+    }
+
+    // If the MPQ has neither hash or block table, we create a default one
+    if(nError == ERROR_SUCCESS && ha->pHashTable == NULL && ha->pHetTable == NULL)
+    {
+        nError = CreateHashTable(ha, HASH_TABLE_SIZE_DEFAULT);
     }
 
     // Now, build the file table. It will be built by combining
-    // the block table, hi-block table, (attributes) and (listfile).
+    // the block table, BET table, hi-block table, (attributes) and (listfile).
     if(nError == ERROR_SUCCESS)
     {
         nError = BuildFileTable(ha, FileSize);
     }
 
-    // Verify the block table, if no kind of protection was detected
+    // Verify the file table, if no kind of protection was detected
     if(nError == ERROR_SUCCESS && (ha->dwFlags & MPQ_FLAG_PROTECTED) == 0)
     {
         TFileEntry * pFileTableEnd = ha->pFileTable + ha->pHeader->dwBlockTableSize;
@@ -330,13 +357,6 @@ bool WINAPI SFileOpenArchive(
         }
     }
 
-    // Load the "(attributes)" file and merge it to the file table
-    if(nError == ERROR_SUCCESS && (dwFlags & MPQ_OPEN_NO_ATTRIBUTES) == 0)
-    {
-        // Ignore result of the operation. (attributes) is optional.
-        SAttrLoadAttributes(ha);
-    }
-
     // Load the internal listfile and include it to the file table
     if(nError == ERROR_SUCCESS && (dwFlags & MPQ_OPEN_NO_LISTFILE) == 0)
     {
@@ -344,13 +364,12 @@ bool WINAPI SFileOpenArchive(
         SFileAddListFile((HANDLE)ha, NULL);
     }
 
-    // Test the indexes from BET and BET table
-#ifdef __STORMLIB_TEST__
-    if(nError == ERROR_SUCCESS)
+    // Load the "(attributes)" file and merge it to the file table
+    if(nError == ERROR_SUCCESS && (dwFlags & MPQ_OPEN_NO_ATTRIBUTES) == 0)
     {
-        TestNewHashBlockTables(ha);
+        // Ignore result of the operation. (attributes) is optional.
+        SAttrLoadAttributes(ha);
     }
-#endif
 
     // Cleanup and exit
     if(nError != ERROR_SUCCESS)
@@ -391,14 +410,17 @@ bool WINAPI SFileFlushArchive(HANDLE hMpq)
     // Save listfile (if created), attributes (if created) and also save MPQ tables.
     if(ha->dwFlags & MPQ_FLAG_CHANGED)
     {
+        // Save the (listfile)
         nError = SListFileSaveToMpq(ha);
         if(nError != ERROR_SUCCESS)
             nResultError = nError;
 
+        // Save the (attributes)
         nError = SAttrFileSaveToMpq(ha);
         if(nError != ERROR_SUCCESS)
             nResultError = nError;
 
+        // Save HET table, BET table, hash table, block table, hi-block table
         nError = SaveMPQTables(ha);
         if(nError != ERROR_SUCCESS)
             nResultError = nError;

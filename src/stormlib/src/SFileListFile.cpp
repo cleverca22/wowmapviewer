@@ -52,7 +52,16 @@ static TListFileCache * CreateListFileCache(HANDLE hMpq, const char * szListFile
     }
 
     // Open the local/internal listfile
-    if(!SFileOpenFileEx(hMpq, szListFile, dwSearchScope, &hListFile))
+    if(SFileOpenFileEx(hMpq, szListFile, dwSearchScope, &hListFile))
+    {
+        TMPQArchive * ha = (TMPQArchive *)hMpq;
+        TMPQFile * hf = (TMPQFile *)hListFile;
+
+        // Remember flags for (listfile)
+        if(hf->pFileEntry != NULL)
+            ha->dwFileFlags1 = hf->pFileEntry->dwFlags;
+    }
+    else
         nError = GetLastError();
 
     // Allocate cache for one file block
@@ -236,32 +245,43 @@ int SListFileCreateNodeForAllLocales(TMPQArchive * ha, const char * szFileName)
     TMPQHash * pFirstHash;
     TMPQHash * pHash;
 
-    // Look for the first hash table entry for the file
-    pFirstHash = pHash = GetFirstHashEntry(ha, szFileName);
-
-    // Go while we found something
-    while(pHash != NULL)
+    // If we have hash table, we use it
+    if(ha->pHashTable != NULL)
     {
-        // Is it a valid file table index ?
-        if(pHash->dwBlockIndex < pHeader->dwBlockTableSize)
+        // Look for the first hash table entry for the file
+        pFirstHash = pHash = GetFirstHashEntry(ha, szFileName);
+
+        // Go while we found something
+        while(pHash != NULL)
         {
-            // If the file name is already there, don't bother.
-            pFileEntry = ha->pFileTable + pHash->dwBlockIndex;
-            if(pFileEntry->szFileName == NULL)
+            // Is it a valid file table index ?
+            if(pHash->dwBlockIndex < pHeader->dwBlockTableSize)
             {
-                pFileEntry->szFileName = ALLOCMEM(char, strlen(szFileName) + 1);
-                if(pFileEntry->szFileName != NULL)
-                {
-                    strcpy(pFileEntry->szFileName, szFileName);
-                }
+                // Allocate file name for the file entry
+                AllocateFileName(ha->pFileTable + pHash->dwBlockIndex, szFileName);
             }
+
+            // Now find the next language version of the file
+            pHash = GetNextHashEntry(ha, pFirstHash, pHash);
         }
 
-        // Now find the next language version of the file
-        pHash = GetNextHashEntry(ha, pFirstHash, pHash);
+        return ERROR_SUCCESS;
     }
 
-    return ERROR_SUCCESS;
+    // If we have HET table, use that one
+    if(ha->pHetTable != NULL)
+    {
+        pFileEntry = GetFileEntryAny(ha, szFileName);
+        if(pFileEntry != NULL)
+        {
+            // Allocate file name for the file entry
+            AllocateFileName(pFileEntry, szFileName);
+        }
+
+        return ERROR_SUCCESS;
+    }
+
+    return ERROR_CAN_NOT_COMPLETE;
 }
 
 // Saves the whole listfile into the MPQ.
@@ -285,7 +305,7 @@ int SListFileSaveToMpq(TMPQArchive * ha)
     // Construct the sort table
     // Note: in MPQs with multiple locale versions of the same file,
     // this code causes adding multiple listfile entries.
-    // Since those MPQs were last time used in Starcraft II,
+    // Since those MPQs were last time used in Starcraft,
     // we leave it as it is.
     for(pFileEntry = ha->pFileTable; pFileEntry < pFileTableEnd; pFileEntry++)
     {
@@ -293,7 +313,7 @@ int SListFileSaveToMpq(TMPQArchive * ha)
         if((pFileEntry->dwFlags & MPQ_FILE_EXISTS) && pFileEntry->szFileName != NULL)
         {
             // Ignore pseudo-names
-            if(!IsPseudoFileName(pFileEntry->szFileName, NULL))
+            if(!IsPseudoFileName(pFileEntry->szFileName, NULL) && !IsInternalMpqFileName(pFileEntry->szFileName))
             {
                 SortTable[nFileNodes++] = pFileEntry->szFileName;
             }
@@ -323,13 +343,13 @@ int SListFileSaveToMpq(TMPQArchive * ha)
         }
 
         // Create the listfile in the MPQ
+        assert(ha->dwFileFlags1 != 0);
         nError = SFileAddFile_Init(ha, LISTFILE_NAME,
                                        NULL,
                                        dwFileSize,
                                        LANG_NEUTRAL,
-                                       MPQ_FILE_ENCRYPTED | MPQ_FILE_COMPRESS | MPQ_FILE_REPLACEEXISTING,
+                                       ha->dwFileFlags1,
                                       &hf);
-
         // Add all file names
         if(nError == ERROR_SUCCESS)
         {
@@ -367,7 +387,12 @@ int SListFileSaveToMpq(TMPQArchive * ha)
 
     // Finalize the file in the MPQ
     if(hf != NULL)
+    {
         SFileAddFile_Finish(hf);
+        ha->dwFlags |= MPQ_FLAG_LISTFILE_VALID;
+    }
+    
+    // Free buffers
     if(SortTable != NULL)
         FREEMEM(SortTable);
     return nError;

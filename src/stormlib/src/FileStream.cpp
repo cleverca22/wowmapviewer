@@ -102,17 +102,17 @@ void ConvertPartHeader(void * partHeader)
 {
     PPART_FILE_HEADER theHeader = (PPART_FILE_HEADER)partHeader;
 
-    theHeader->PartialVersion = SwapULong(theHeader->PartialVersion);
-    theHeader->Unknown0C      = SwapULong(theHeader->Unknown0C);
-    theHeader->Unknown10      = SwapULong(theHeader->Unknown10);
-    theHeader->Unknown14      = SwapULong(theHeader->Unknown14);
-    theHeader->Unknown18      = SwapULong(theHeader->Unknown18);
-    theHeader->Unknown1C      = SwapULong(theHeader->Unknown1C);
-    theHeader->Unknown20      = SwapULong(theHeader->Unknown20);
-    theHeader->ZeroValue      = SwapULong(theHeader->ZeroValue);
-    theHeader->FileSizeLo     = SwapULong(theHeader->FileSizeLo);
-    theHeader->FileSizeHi     = SwapULong(theHeader->FileSizeHi);
-    theHeader->PartSize       = SwapULong(theHeader->PartSize);
+    theHeader->PartialVersion = SwapUInt32(theHeader->PartialVersion);
+    theHeader->Unknown0C      = SwapUInt32(theHeader->Unknown0C);
+    theHeader->Unknown10      = SwapUInt32(theHeader->Unknown10);
+    theHeader->Unknown14      = SwapUInt32(theHeader->Unknown14);
+    theHeader->Unknown18      = SwapUInt32(theHeader->Unknown18);
+    theHeader->Unknown1C      = SwapUInt32(theHeader->Unknown1C);
+    theHeader->Unknown20      = SwapUInt32(theHeader->Unknown20);
+    theHeader->ZeroValue      = SwapUInt32(theHeader->ZeroValue);
+    theHeader->FileSizeLo     = SwapUInt32(theHeader->FileSizeLo);
+    theHeader->FileSizeHi     = SwapUInt32(theHeader->FileSizeHi);
+    theHeader->PartSize       = SwapUInt32(theHeader->PartSize);
 }
 #endif
 
@@ -165,9 +165,14 @@ static HANDLE CreateNewFile(
 
 #ifdef PLATFORM_WINDOWS
     {
+        DWORD dwShareMode = FILE_SHARE_READ;
+
+        if(dwGlobalFlags & SFILE_FLAG_ALLOW_WRITE_SHARE)
+            dwShareMode |= FILE_SHARE_WRITE;
+
         hFile = CreateFile(szFileName,
                            GENERIC_READ | GENERIC_WRITE,
-                           FILE_SHARE_READ,
+                           dwShareMode,
                            NULL,
                            CREATE_ALWAYS,
                            0,
@@ -259,9 +264,14 @@ static HANDLE OpenExistingFile(
 
 #ifdef PLATFORM_WINDOWS
     {
+        DWORD dwShareMode = FILE_SHARE_READ;
+
+        if(dwGlobalFlags & SFILE_FLAG_ALLOW_WRITE_SHARE)
+            dwShareMode |= FILE_SHARE_WRITE;
+
         hFile = CreateFile(szFileName,
                            bWriteAccess ? (GENERIC_READ | GENERIC_WRITE) : GENERIC_READ,
-                           FILE_SHARE_READ,
+                           dwShareMode,
                            NULL,
                            OPEN_EXISTING,
                            0,
@@ -875,7 +885,7 @@ static DWORD Rol32(DWORD dwValue, DWORD dwRolCount)
 }
 
 static void DecryptFileChunk(
-    LPDWORD MpqData,
+    DWORD * MpqData,
     LPBYTE pbKey,
     ULONGLONG ByteOffset,
     DWORD dwLength)
@@ -1220,7 +1230,7 @@ TFileStream * FileStream_OpenFile(
     bool bWriteAccess)                      // false = read-only, true = read+write
 {
     PART_FILE_HEADER PartHdr;
-    ULONGLONG VirtualSize;             // Size of the file stored in part file
+    ULONGLONG VirtualSize;                  // Size of the file stored in part file
     ULONGLONG ByteOffset = {0};
     TFileStream * pStream;
     size_t nStructLength;

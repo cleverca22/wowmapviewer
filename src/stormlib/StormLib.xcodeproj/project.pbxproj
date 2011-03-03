@@ -90,6 +90,8 @@
 		2299DA4F1167FD16005C19BF /* SFileAddFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2299DA4D1167FD16005C19BF /* SFileAddFile.cpp */; };
 		22AEA122123125D800359B16 /* SFilePatchArchives.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22AEA121123125D800359B16 /* SFilePatchArchives.cpp */; };
 		22AEA123123125D800359B16 /* SFilePatchArchives.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22AEA121123125D800359B16 /* SFilePatchArchives.cpp */; };
+		22B2515E12F234FF0059A0E8 /* SBaseDumpData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22B2515D12F234FF0059A0E8 /* SBaseDumpData.cpp */; };
+		22B2515F12F234FF0059A0E8 /* SBaseDumpData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22B2515D12F234FF0059A0E8 /* SBaseDumpData.cpp */; };
 		22C9187D11933FCF0083AC69 /* hash_memory.c in Sources */ = {isa = PBXBuildFile; fileRef = 22C9182B11933FCF0083AC69 /* hash_memory.c */; };
 		22C9187E11933FCF0083AC69 /* md5.c in Sources */ = {isa = PBXBuildFile; fileRef = 22C9182C11933FCF0083AC69 /* md5.c */; };
 		22C9187F11933FCF0083AC69 /* sha1.c in Sources */ = {isa = PBXBuildFile; fileRef = 22C9182D11933FCF0083AC69 /* sha1.c */; };

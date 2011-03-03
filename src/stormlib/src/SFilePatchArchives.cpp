@@ -527,6 +527,7 @@ bool WINAPI SFileOpenPatchArchive(
         {
             if(ha->haPatch == NULL)
             {
+                haPatch->haBase = ha;
                 ha->haPatch = haPatch;
                 return true;
             }

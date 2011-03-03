@@ -265,8 +265,8 @@ static int ReadMpqFileSingleUnit(TMPQFile * hf, void * pvBuffer, DWORD dwToRead,
     }
 
     // If the file is a patch file, adjust raw data offset
-    if(hf->PatchInfo != NULL)
-        RawFilePos += hf->PatchInfo->dwLength;
+    if(hf->pPatchInfo != NULL)
+        RawFilePos += hf->pPatchInfo->dwLength;
 
     // If the file buffer is not loaded yet, do it
     if(hf->dwSectorOffs != 0)
@@ -283,7 +283,7 @@ static int ReadMpqFileSingleUnit(TMPQFile * hf, void * pvBuffer, DWORD dwToRead,
         // someone made a mistake at Blizzard ...
         //
 
-        if(hf->PatchInfo != NULL)
+        if(hf->pPatchInfo != NULL)
         {
             // Allocate space for 
             pbCompressed = ALLOCMEM(BYTE, pFileEntry->dwCmpSize);
@@ -572,12 +572,15 @@ static int ReadMpqFilePatchFile(TMPQFile * hf, void * pvBuffer, DWORD dwToRead, 
             hf->dwFilePos += dwToRead;
             dwBytesRead = dwToRead;
         }
+
+        // Set the proper error code
+        nError = (dwBytesRead == dwBytesToRead) ? ERROR_SUCCESS : ERROR_HANDLE_EOF;
     }
 
     // Give the result to the caller
     if(pdwBytesRead != NULL)
         *pdwBytesRead = dwBytesRead;
-    return (dwBytesRead == dwBytesToRead) ? ERROR_SUCCESS : ERROR_HANDLE_EOF;
+    return nError;
 }
 
 //-----------------------------------------------------------------------------
@@ -892,15 +895,13 @@ bool WINAPI SFileGetFileName(HANDLE hFile, char * szFileName)
             if((FirstBytes[0] & data2ext[i].dwOffset00Mask) == data2ext[i].dwOffset00Data &&
                (FirstBytes[1] & data2ext[i].dwOffset04Mask) == data2ext[i].dwOffset04Data)
             {
-                sprintf(szPseudoName, "File%08u.%s", (unsigned int)hf->dwBlockIndex, data2ext[i].szExt);
+                sprintf(szPseudoName, "File%08u.%s", (unsigned int)(pFileEntry - hf->ha->pFileTable), data2ext[i].szExt);
                 break;
             }
         }
 
         // Put the file name to the file table
-        pFileEntry->szFileName = ALLOCMEM(char, strlen(szPseudoName) + 1);
-        if(pFileEntry->szFileName != NULL)
-            strcpy(pFileEntry->szFileName, szPseudoName);
+        AllocateFileName(pFileEntry, szPseudoName);
     }
 
     // Now put the file name to the file structure
@@ -975,6 +976,11 @@ bool WINAPI SFileGetFileInfo(
             GIVE_32BIT_VALUE(ha->pHeader->dwArchiveSize);
             break;
 
+        case SFILE_INFO_MAX_FILE_COUNT:     // Max. number of files in the MPQ
+            VERIFY_MPQ_HANDLE(ha);
+            GIVE_32BIT_VALUE(ha->dwMaxFileCount);
+            break;
+
         case SFILE_INFO_HASH_TABLE_SIZE:    // Size of the hash table
             VERIFY_MPQ_HANDLE(ha);
             GIVE_32BIT_VALUE(ha->pHeader->dwHashTableSize);
@@ -1042,7 +1048,7 @@ bool WINAPI SFileGetFileInfo(
 
         case SFILE_INFO_HASH_INDEX:
             VERIFY_FILE_HANDLE(hf);
-            GIVE_32BIT_VALUE(hf->dwHashIndex);
+            GIVE_32BIT_VALUE(hf->pFileEntry->dwHashIndex);
             break;
 
         case SFILE_INFO_CODENAME1:
@@ -1062,7 +1068,7 @@ bool WINAPI SFileGetFileInfo(
 
         case SFILE_INFO_BLOCKINDEX:
             VERIFY_FILE_HANDLE(hf);
-            GIVE_32BIT_VALUE(hf->dwBlockIndex);
+            GIVE_32BIT_VALUE((DWORD)(hf->pFileEntry - hf->ha->pFileTable));
             break;
 
         case SFILE_INFO_FILE_SIZE:

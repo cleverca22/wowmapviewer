@@ -71,11 +71,9 @@
 #define MAKE_OFFSET64(hi, lo)      (((ULONGLONG)hi << 32) | lo)
 
 //-----------------------------------------------------------------------------
-// StormLib private structures
-
-//-----------------------------------------------------------------------------
 // StormLib internal global variables
 
+extern DWORD dwGlobalFlags;                 // Global StormLib flags
 extern LCID lcFileLocale;                   // Preferred file locale
 
 //-----------------------------------------------------------------------------
@@ -85,6 +83,8 @@ extern LCID lcFileLocale;                   // Preferred file locale
 #define MPQ_KEY_BLOCK_TABLE 0xEC83B3A3      // Obtained by HashString("(block table)", MPQ_HASH_FILE_KEY)
 
 void InitializeMpqCryptography();
+
+DWORD GetHashTableSizeForFileCount(DWORD dwFileCount);
 
 bool IsPseudoFileName(const char * szFileName, LPDWORD pdwFileIndex);
 ULONGLONG HashStringJenkins(const char * szFileName);
@@ -109,16 +109,22 @@ bool IsValidFileHandle(TMPQFile * hf);
 
 TMPQHash * GetFirstHashEntry(TMPQArchive * ha, const char * szFileName);
 TMPQHash * GetNextHashEntry(TMPQArchive * ha, TMPQHash * pFirstHash, TMPQHash * pPrevHash);
-TMPQHash * AllocateHashEntry(TMPQArchive * ha, const char * szFileName, LCID lcLocale);
+DWORD AllocateHashEntry(TMPQArchive * ha, TFileEntry * pFileEntry);
+DWORD AllocateHetEntry(TMPQArchive * ha, TFileEntry * pFileEntry);
 
 void FindFreeMpqSpace(TMPQArchive * ha, ULONGLONG * pMpqPos);
 
 // Functions that load the HET abd BET tables
+int  CreateHashTable(TMPQArchive * ha, DWORD dwHashTableSize);
 int  LoadHashTable(TMPQArchive * ha);
+int  LoadHetTable(TMPQArchive * ha);
 int  BuildFileTable(TMPQArchive * ha, ULONGLONG FileSize);
-int  LoadHetAndBetTable(TMPQArchive * ha);
 int  SaveMPQTables(TMPQArchive * ha);
+
+TMPQHetTable * CreateHetTable(DWORD dwMaxFileCount, DWORD dwHashBitSize, bool bCreateEmpty);
 void FreeHetTable(TMPQHetTable * pHetTable);
+
+TMPQBetTable * CreateBetTable(DWORD dwMaxFileCount);
 void FreeBetTable(TMPQBetTable * pBetTable);
 
 // Functions for finding files in the file table
@@ -127,14 +133,13 @@ TFileEntry * GetFileEntryLocale(TMPQArchive * ha, const char * szFileName, LCID 
 TFileEntry * GetFileEntryExact(TMPQArchive * ha, const char * szFileName, LCID lcLocale);
 TFileEntry * GetFileEntryByIndex(TMPQArchive * ha, DWORD dwIndex);
 
+// Allocates file name in the file entry
+void AllocateFileName(TFileEntry * pFileEntry, const char * szFileName);
+
 // Allocates new file entry in the MPQ tables. Reuses existing, if possible
 TFileEntry * FindFreeFileEntry(TMPQArchive * ha);
 TFileEntry * AllocateFileEntry(TMPQArchive * ha, const char * szFileName, LCID lcLocale);
-TFileEntry * RenameFile(TMPQArchive * ha, const char * szFileName, const char * szNewFileName);
 void FreeFileEntry(TMPQArchive * ha, TFileEntry * pFileEntry);
-
-// Experimental function for testing new hash&block tables
-void TestNewHashBlockTables(TMPQArchive * ha);
 
 //-----------------------------------------------------------------------------
 // Common functions - MPQ File
@@ -149,6 +154,8 @@ void CalculateRawSectorOffset(ULONGLONG & RawFilePos, TMPQFile * hf, DWORD dwSec
 int  WritePatchInfo(TMPQFile * hf);
 int  WriteSectorOffsets(TMPQFile * hf);
 int  WriteSectorChecksums(TMPQFile * hf);
+int  WriteMemDataMD5(TFileStream * pStream, ULONGLONG RawDataOffs, void * pvRawData, DWORD dwRawDataSize, DWORD dwChunkSize, LPDWORD pcbTotalSize);
+int  WriteMpqDataMD5(TFileStream * pStream, ULONGLONG RawDataOffs, DWORD dwRawDataSize, DWORD dwChunkSize);
 void FreeMPQFile(TMPQFile *& hf);
 
 bool IsPatchData(const void * pvData, DWORD cbData, LPDWORD pdwPatchedFileSize);
@@ -197,6 +204,18 @@ int  SAttrFileSaveToMpq(TMPQArchive * ha);
 // Listfile functions
 
 int  SListFileSaveToMpq(TMPQArchive * ha);
+
+//-----------------------------------------------------------------------------
+// Dump data support
+
+#ifdef __STORMLIB_DUMP_DATA__
+void DumpMpqHeader(TMPQHeader * pHeader);
+void DumpHetAndBetTable(TMPQHetTable * pHetTable, TMPQBetTable * pBetTable);
+
+#else
+#define DumpMpqHeader(h)           /* */
+#define DumpHetAndBetTable(h, b)   /* */
+#endif
 
 #endif // __STORMCOMMON_H__
 

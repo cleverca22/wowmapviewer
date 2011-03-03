@@ -12,7 +12,7 @@
 #include "StormLib.h"
 #include "StormCommon.h"
 
-bool WINAPI SFileExtractFile(HANDLE hMpq, const char * szToExtract, const char * szExtracted)
+bool WINAPI SFileExtractFile(HANDLE hMpq, const char * szToExtract, const char * szExtracted, DWORD dwSearchScope)
 {
     TFileStream * pLocalFile = NULL;
     HANDLE hMpqFile = NULL;
@@ -21,7 +21,7 @@ bool WINAPI SFileExtractFile(HANDLE hMpq, const char * szToExtract, const char *
     // Open the MPQ file
     if(nError == ERROR_SUCCESS)
     {
-        if(!SFileOpenFileEx(hMpq, szToExtract, SFILE_OPEN_FROM_MPQ, &hMpqFile))
+        if(!SFileOpenFileEx(hMpq, szToExtract, dwSearchScope, &hMpqFile))
             nError = GetLastError();
     }
 

@@ -31,12 +31,8 @@
 
   // In MSVC 8.0, there are some functions declared as deprecated.
   #if _MSC_VER >= 1400
-    #ifndef _CRT_SECURE_NO_DEPRECATE
-      #define _CRT_SECURE_NO_DEPRECATE
-    #endif
-    #ifndef _CRT_NON_CONFORMING_SWPRINTFS
-      #define _CRT_NON_CONFORMING_SWPRINTFS
-    #endif
+  #define _CRT_SECURE_NO_DEPRECATE
+  #define _CRT_NON_CONFORMING_SWPRINTFS
   #endif
 
   #include <assert.h>      
@@ -63,9 +59,7 @@
   #include <Carbon/Carbon.h> // Mac OS X
   
   #define    PKEXPORT
-  #ifndef    __SYS_ZLIB
   #define    __SYS_ZLIB
-  #endif
   #define    __SYS_BZLIB
 
   #ifndef __BIG_ENDIAN__
@@ -200,16 +194,18 @@
     #define    BSWAP_TMPQUSERDATA(a)            {}
     #define    BSWAP_TMPQHEADER(a)              {}
 #else
-    extern int16_t  SwapInt16(uint16_t);
-    extern uint16_t SwapUInt16(uint16_t);
-    extern int32_t  SwapInt32(uint32_t);
-    extern uint32_t SwapUInt32(uint32_t);
-    extern int32_t  SwapInt64(uint64_t);
-    extern uint32_t SwapUInt64(uint64_t);
-    extern void ConvertUnsignedLongBuffer(void * ptr, size_t length);
-    extern void ConvertUnsignedShortBuffer(void * ptr, size_t length);
-    extern void ConvertTMPQUserData(void *userData);
-    extern void ConvertTMPQHeader(void *header);
+    int16_t  SwapInt16(uint16_t);
+    uint16_t SwapUInt16(uint16_t);
+    int32_t  SwapInt32(uint32_t);
+    uint32_t SwapUInt32(uint32_t);
+    int64_t  SwapInt64(uint64_t);
+    uint64_t SwapUInt64(uint64_t);
+    void ConvertUInt16Buffer(void * ptr, size_t length);
+    void ConvertUInt32Buffer(void * ptr, size_t length);
+    void ConvertUInt64Buffer(void * ptr, size_t length);
+    void ConvertPartHeader(void * partHeader);
+    void ConvertTMPQUserData(void *userData);
+    void ConvertTMPQHeader(void *header);
     #define    BSWAP_INT16_SIGNED(a)            SwapInt16((a))
     #define    BSWAP_INT16_UNSIGNED(a)          SwapUInt16((a))
     #define    BSWAP_INT32_SIGNED(a)            SwapInt32((a))

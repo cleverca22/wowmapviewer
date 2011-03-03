@@ -304,7 +304,7 @@ static bool CompareArchivedFilesRR(const char * /* szFileName */, HANDLE hFile1,
     dwFileSize2 = SFileGetFileSize(hFile2, NULL);
     if(dwFileSize1 != dwFileSize2)
     {
-        printf("Different size from SFileGetFileSize, Storm.dll: %u, StormLib: %u !!!!\n", dwFileSize1, dwFileSize2);
+        printf("Different size from SFileGetFileSize (file1: %u, file2: %u)\n", dwFileSize1, dwFileSize2);
         return false;
     }
 
@@ -334,7 +334,7 @@ static bool CompareArchivedFilesRR(const char * /* szFileName */, HANDLE hFile1,
             dwRead2 = SFileSetFilePointer(hFile2, dwPosition, NULL, dwMoveMethod);
             if(dwRead1 != dwRead2)
             {
-                printf("Difference returned by SFileSetFilePointer, Storm.dll: %u, StormLib: %u !!!!\n", dwRead1, dwRead2);
+                printf("Difference returned by SFileSetFilePointer (file1: %u, file2: %u)\n", dwRead1, dwRead2);
                 nError = ERROR_CAN_NOT_COMPLETE;
                 break;
             }
@@ -344,7 +344,7 @@ static bool CompareArchivedFilesRR(const char * /* szFileName */, HANDLE hFile1,
             bResult2 = SFileReadFile(hFile2, pbBuffer2, dwToRead, &dwRead2, NULL);
             if(bResult1 != bResult2)
             {
-                printf("Different results from SFileReadFile, Storm.dll: %u, StormLib: %u !!!!\n", bResult1, bResult2);
+                printf("Different results from SFileReadFile (file1: %u, file2: %u)\n\n", bResult1, bResult2);
                 nError = ERROR_CAN_NOT_COMPLETE;
                 break;
             }
@@ -352,7 +352,7 @@ static bool CompareArchivedFilesRR(const char * /* szFileName */, HANDLE hFile1,
             // Test the number of bytes read
             if(dwRead1 != dwRead2)
             {
-                printf("Different bytes read from SFileReadFile, Storm.dll: %u, StormLib: %u !!!!\n", dwRead1, dwRead2);
+                printf("Different bytes read from SFileReadFile (file1: %u, file2: %u)\n\n", dwRead1, dwRead2);
                 nError = ERROR_CAN_NOT_COMPLETE;
                 break;
             }
@@ -360,7 +360,7 @@ static bool CompareArchivedFilesRR(const char * /* szFileName */, HANDLE hFile1,
             // Test the content
             if(dwRead1 != 0 && memcmp(pbBuffer1, pbBuffer2, dwRead1))
             {
-                printf("Different data content from SFileReadFile !!\n");
+                printf("Different data content from SFileReadFile\n");
                 nError = ERROR_CAN_NOT_COMPLETE;
                 break;
             }
@@ -667,39 +667,60 @@ __TryAgain:
 
 static int TestArchiveOpenAndClose(const char * szMpqName)
 {
-    const char * szFileName1 = "pc-game-hdfiles\\WTF\\RunOnce.wtf";
-    TMPQArchive * ha;
+    const char * szFileName1 = "ITEM\\TEXTURECOMPONENTS\\LegLowerTexture\\MAIL_DUNGEONSHAMAN_B_01BLUE_PANT_LL_U.BLP";
+//  const char * szFileName2 = "items\\map\\mapz_deleted.cel";
+    TMPQArchive * ha = NULL;
     HANDLE hFile1 = NULL;
-    HANDLE hFile2 = NULL;
+//  HANDLE hFile2 = NULL;
     HANDLE hMpq = NULL;
     int nError = ERROR_SUCCESS;
 
     if(nError == ERROR_SUCCESS)
     {
         printf("Opening archive %s ...\n", szMpqName);
-        if(!SFileOpenArchive(szMpqName, 0, MPQ_OPEN_FORCE_MPQ_V1, /* MPQ_OPEN_ENCRYPTED,*/ &hMpq))
+        if(!SFileOpenArchive(szMpqName, 0, 0, /* MPQ_OPEN_ENCRYPTED,*/ &hMpq))
             nError = GetLastError();
         ha = (TMPQArchive *)hMpq;
     }
+/*
+    // Test for TBitArray
+    if(nError == ERROR_SUCCESS && ha->pHetTable != NULL)
+    {
+        TBitArray * pBitArray = ha->pHetTable->pBetIndexes;
 
-    // Open listfile from the MPQ
+        for(ULONG i = 0; i < 0x10000; i++)
+        {
+            BYTE LoadedBits[0x20];
+            BYTE SaveBits[0x40];
+            unsigned int nBitPosition = (i >> 0x08);
+            unsigned int nBitCount = (i & 0xFF);
+
+            memset(LoadedBits, 0, sizeof(LoadedBits));
+            memcpy(SaveBits, pBitArray->Elements, sizeof(SaveBits));
+
+            // Load the index to the BET table
+            pBitArray->GetBits(nBitPosition, nBitCount, LoadedBits, sizeof(LoadedBits));
+
+            // Load the index to the BET table
+            pBitArray->SetBits(nBitPosition, nBitCount, LoadedBits, sizeof(LoadedBits));
+
+            // Verify the bits
+            if(memcmp(SaveBits, pBitArray->Elements, sizeof(SaveBits)))
+                assert(false);
+        }
+    }
+*/
+    // Verify the raw data in the archive
     if(nError == ERROR_SUCCESS)
     {
         // Verify the archive
-        SFileVerifyRawData(hMpq, SFILE_VERIFY_MPQ_HEADER, NULL);
-        SFileVerifyRawData(hMpq, SFILE_VERIFY_HET_TABLE, NULL);
-        SFileVerifyRawData(hMpq, SFILE_VERIFY_BET_TABLE, NULL);
-//      SFileVerifyRawData(hMpq, SFILE_VERIFY_HASH_TABLE, NULL);
-//      SFileVerifyRawData(hMpq, SFILE_VERIFY_BLOCK_TABLE, NULL);
-        SFileVerifyRawData(hMpq, SFILE_VERIFY_HIBLOCK_TABLE, NULL);
-        SFileVerifyRawData(hMpq, SFILE_VERIFY_FILE, LISTFILE_NAME);
-        SFileVerifyRawData(hMpq, SFILE_VERIFY_FILE, ATTRIBUTES_NAME);
+        SFileVerifyRawData(hMpq, SFILE_VERIFY_FILE, szFileName1);
 
-        // Try toopen a file
+        // Try to open a file
         if(!SFileOpenFileEx(hMpq, szFileName1, SFILE_OPEN_FROM_MPQ, &hFile1))
         {
             nError = GetLastError();
-            printf("%s - file integrity error\n", szFileName1);
+            printf("%s - file not found in the MPQ\n", szFileName1);
         }
     }
 
@@ -711,7 +732,7 @@ static int TestArchiveOpenAndClose(const char * szMpqName)
 
         SFileReadFile(hFile1, Buffer, sizeof(Buffer), &dwBytesRead);
 	}
-
+/*
     // Verify the MPQ listfile
     if(nError == ERROR_SUCCESS)
     {
@@ -719,7 +740,7 @@ static int TestArchiveOpenAndClose(const char * szMpqName)
         if(!CompareArchivedFilesRR(szFileName1, hFile1, hFile2, 0x100000))
             nError = ERROR_CAN_NOT_COMPLETE;
     }
-
+*/
     if(hFile1 != NULL)
         SFileCloseFile(hFile1);
     if(hMpq != NULL)
@@ -764,7 +785,7 @@ static int TestFindFiles(const char * szMpqName)
 
                 if(sf.dwFileFlags & MPQ_FILE_SECTOR_CRC)
                 {
-                    dwExtraDataSize = hf->SectorOffsets[hf->dwSectorCount - 1] - hf->SectorOffsets[hf->dwSectorCount - 2];
+                    dwExtraDataSize = hf->SectorOffsets[hf->dwSectorCount + 1] - hf->SectorOffsets[hf->dwSectorCount];
                     if(dwExtraDataSize != 0)
                         nFound++;
                 }
@@ -795,6 +816,7 @@ static int TestMpqCompacting(const char * szMpqName)
         if(!SFileOpenArchive(szMpqName, 0, 0, &hMpq))
             nError = GetLastError();
     }
+
 /*
     if(nError == ERROR_SUCCESS)
     {
@@ -810,7 +832,7 @@ static int TestMpqCompacting(const char * szMpqName)
     {
         printf("Compacting archive ...\r");
         SFileSetCompactCallback(hMpq, CompactCB, NULL);
-        if(!SFileCompactArchive(hMpq, NULL))
+        if(!SFileCompactArchive(hMpq, "c:\\Tools32\\ListFiles\\ListFile.txt"))
             nError = GetLastError();
     }
 
@@ -821,8 +843,7 @@ static int TestMpqCompacting(const char * szMpqName)
     return nError;
 }
 
-
-static int TestCreateArchiveV2(const char * szMpqName)
+static int TestCreateArchive(const char * szMpqName)
 {
     TFileStream * pStream;
     const char * szFileName1 = MAKE_PATH("FileTest.exe");
@@ -853,7 +874,7 @@ static int TestCreateArchiveV2(const char * szMpqName)
     {
         if(!SFileCreateArchive(szMpqName,
                                MPQ_CREATE_ARCHIVE_V4 | MPQ_CREATE_ATTRIBUTES,
-                               0x40,
+                               32,
                               &hMpq))
         {
             nError = GetLastError();
@@ -863,7 +884,7 @@ static int TestCreateArchiveV2(const char * szMpqName)
     // Add the same file multiple times
     if(nError == ERROR_SUCCESS)
     {
-        SFileCompactArchive(hMpq);
+//      SFileCompactArchive(hMpq);
 //      if(!SFileAddFileEx(hMpq,
 //                         "e:\\Multimedia\\MPQs\\Achievement.dbc",
 //                         "enGB\\DBFilesClient\\Achievement.dbc", 
@@ -882,7 +903,7 @@ static int TestCreateArchiveV2(const char * szMpqName)
                 printf("Failed to add the file \"%s\".\n", szMpqFileName);
 
             dwVerifyResult = SFileVerifyFile(hMpq, szMpqFileName, MPQ_ATTRIBUTE_CRC32 | MPQ_ATTRIBUTE_MD5);
-            if(dwVerifyResult & (VERIFY_OPEN_ERROR | VERIFY_READ_ERROR | VERIFY_SECTOR_CHECKSUM_ERROR | VERIFY_FILE_CHECKSUM_ERROR | VERIFY_FILE_MD5_ERROR))
+            if(dwVerifyResult & (VERIFY_OPEN_ERROR | VERIFY_READ_ERROR | VERIFY_FILE_SECTOR_CRC_ERROR | VERIFY_FILE_CHECKSUM_ERROR | VERIFY_FILE_MD5_ERROR))
                 printf("CRC error on \"%s\"\n", szMpqFileName);
         }
 
@@ -942,32 +963,49 @@ static int TestCreateArchiveV2(const char * szMpqName)
             printf("Rename test failed.\n\n");
     }
 
+    // Compact the archive
+//  if(nError == ERROR_SUCCESS)
+//      SFileCompactArchive(hMpq);
+
     // Test changing hash table size
-    if(nError == ERROR_SUCCESS)
-        SFileSetHashTableSize(hMpq, 0x100);
+//  if(nError == ERROR_SUCCESS)
+//      SFileSetMaxFileCount(hMpq, 0x95);
 
     if(hMpq != NULL)
         SFileCloseArchive(hMpq);
+
+    // Try to reopen the archive
+    if(SFileOpenArchive(szMpqName, 0, 0, &hMpq))
+        SFileCloseArchive(hMpq);
+
     printf("\n");
     return nError;
 }
 
-static int TestAddFileToMpq(
+static int TestAddFilesToMpq(
     const char * szMpqName,
-    const char * szFileName)
+    ...
+    )
 {
+    const char * szFileName;
     HANDLE hMpq;
+    va_list argList;
     int nError = ERROR_SUCCESS;
 
     if(!SFileOpenArchive(szMpqName, 0, 0, &hMpq))
         return GetLastError();
 
-    if(!SFileAddFileEx(hMpq, szFileName,
-                             GetPlainFileName(szFileName),
-                             MPQ_FILE_COMPRESS,
-                             MPQ_COMPRESSION_ZLIB))
+    va_start(argList, szMpqName);
+    while((szFileName = va_arg(argList, const char *)) != NULL)
     {
-        nError = GetLastError();
+        if(!SFileAddFileEx(hMpq, szFileName,
+                                 GetPlainFileName(szFileName),
+                                 MPQ_FILE_COMPRESS,
+                                 MPQ_COMPRESSION_ZLIB))
+        {
+            nError = GetLastError();
+            printf("Failed to add the file \"%s\"\n", szFileName);
+        }
     }
 
     SFileCloseArchive(hMpq);
@@ -1299,7 +1337,11 @@ static int TestCompareTwoArchives(
         if(ha1->pHeader->wFormatVersion != ha2->pHeader->wFormatVersion)
             printf(" - Format version is different\n");
         if(ha1->pHeader->wSectorSize != ha2->pHeader->wSectorSize)
-            printf(" - Block size Format version is different\n");
+            printf(" - Sector size is different\n");
+        if(ha1->pHeader->HetTableSize64 != ha2->pHeader->HetTableSize64)
+            printf(" - HET table size is different\n");
+        if(ha1->pHeader->BetTableSize64 != ha2->pHeader->BetTableSize64)
+            printf(" - BET table size is different\n");
         if(ha1->pHeader->dwHashTableSize != ha2->pHeader->dwHashTableSize)
             printf(" - Hash table size is different\n");
         if(ha1->pHeader->dwBlockTableSize != ha2->pHeader->dwBlockTableSize)
@@ -1322,7 +1364,7 @@ static int TestCompareTwoArchives(
 
         while(hFind != NULL && bResult == true)
         {
-//          ShowProcessedFile(sf.cFileName);
+            printf("%s\n", sf.cFileName);
             SFileSetLocale(sf.lcLocale);
 
             // Open the first file
@@ -1396,7 +1438,7 @@ static int TestOpenPatchedArchive(const char * szMpqName, ...)
     HANDLE hMpq = NULL;
     va_list argList;
 //  const char * szFileName = "DBFilesClient\\Achievement.dbc";
-    const char * szFileName = "creature/murloc/deathwingbabymurloc.m2";
+    const char * szFileName = "ruRU/DBFilesClient/Spell.dbc";
     const char * szExtension;
     const char * szLocale;
     char szPatchPrefix[MPQ_PATCH_PREFIX_LEN];
@@ -1463,6 +1505,13 @@ static int TestOpenPatchedArchive(const char * szMpqName, ...)
         }
     }
 */
+
+    // Now try to open patched version of "Achievement.dbc"
+    if(nError == ERROR_SUCCESS)
+    {
+        SFileExtractFile(hMpq, szFileName, "E:\\Spell.dbc");
+    }
+
     // Now try to open patched version of "Achievement.dbc"
     if(nError == ERROR_SUCCESS)
     {
@@ -1550,22 +1599,33 @@ int main(void)
                                                                                             
     // Test the archive open and close
     if(nError == ERROR_SUCCESS)
-        nError = TestArchiveOpenAndClose(MAKE_PATH("2002 - Warcraft III/siverrpg_1.9_ver.w3x"));
-//      nError = TestArchiveOpenAndClose(MAKE_PATH("2011 - WoW-Cataclysm/expansion-locale-frFR.MPQ"));
+        nError = TestArchiveOpenAndClose(MAKE_PATH("2011 - Wow/art.MPQ"));
+//      nError = TestArchiveOpenAndClose(MAKE_PATH("2011 - WoW-Cataclysm/wow-update-13202.MPQ"));
+//      nError = TestArchiveOpenAndClose(MAKE_PATH("2002 - Warcraft III/ProtectedMap_HashTable_FakeValid.w3x"));
 //      nError = TestArchiveOpenAndClose(MAKE_PATH("2010 - Starcraft II/Installer Tome 1 enGB.MPQE"));
 //      nError = TestArchiveOpenAndClose(MAKE_PATH("1997 - Diablo I/single_0.sv"));
 //      nError = TestArchiveOpenAndClose(MAKE_PATH("2004 - World of Warcraft/SoundCache-enUS.MPQ"));
-//      nError = TestArchiveOpenAndClose(MAKE_PATH("2009 - PartialMPQs/interface.MPQ.part"));
-                                                                             
+//      nError = TestArchiveOpenAndClose(MAKE_PATH("DIABDAT_orig.MPQ"));
+
 //  if(nError == ERROR_SUCCESS)
 //      nError = TestFindFiles(MAKE_PATH("2002 - Warcraft III/HumanEd.mpq"));
 
     // Create a big MPQ archive
 //  if(nError == ERROR_SUCCESS)
-//      nError = TestCreateArchiveV2(MAKE_PATH("Test.mpq"));
+//      nError = TestCreateArchive(MAKE_PATH("Test.mpq"));
 
 //  if(nError == ERROR_SUCCESS)
-//      nError = TestAddFileToMpq(MAKE_PATH("Test.mpq"), MAKE_PATH("Arj32.exe"));
+//      nError = TestAddFilesToMpq(MAKE_PATH("wow-update-13202.MPQ"),
+//                                 "c:\\Tools32\\Arj32.exe",
+//                                 "c:\\Tools32\\autoruns.chm",
+//                                 "c:\\Tools32\\CPUEater.exe",
+//                                 "c:\\Tools32\\dumpbin.exe",
+//                                 "c:\\Tools32\\editbin.exe",
+//                                 "c:\\Tools32\\fsg.ini",
+//                                 "c:\\Tools32\\hiew8.ini",
+//                                 "c:\\Tools32\\ida.bat",
+//                                 "c:\\Tools32\\mp3.ini",
+//                                 NULL);
 
 //  if(nError == ERROR_SUCCESS)
 //      nError = TestCreateArchiveFromMemory(MAKE_PATH("Test-leak.mpq"));
@@ -1583,7 +1643,7 @@ int main(void)
 
     // Compact the archive        
 //  if(nError == ERROR_SUCCESS)
-//      nError = TestMpqCompacting(MAKE_PATH("2002 - Warcraft III/(10)DustwallowKeys.w3m"));
+//      nError = TestMpqCompacting(MAKE_PATH("DIABDAT_orig.MPQ"));
     
     // Create copy of the archive, appending some bytes before the MPQ header
 //  if(nError == ERROR_SUCCESS)
@@ -1591,25 +1651,21 @@ int main(void)
 
 //  if(nError == ERROR_SUCCESS)
 //  {
-//      nError = TestCompareTwoArchives(MAKE_PATH("Warcraft III/War3x.mpq"),
-//                                      NULL,
+//      nError = TestCompareTwoArchives(MAKE_PATH("2011 - WoW-Cataclysm/wow-update-13189.MPQ"),
+//                                      MAKE_PATH("wow-update-13189.MPQ"),
 //                                      NULL,
 //                                      0x1001);
 //  }
 
-    if(nError == ERROR_SUCCESS)
-    {
-        nError = TestOpenPatchedArchive(MAKE_PATH("2011 - WoW-Cataclysm2/locale-enUS.MPQ"),
-                                        MAKE_PATH("2011 - WoW-Cataclysm2/wow-update-12694.MPQ"),
-                                        MAKE_PATH("2011 - WoW-Cataclysm2/wow-update-12759.MPQ"),
-                                        MAKE_PATH("2011 - WoW-Cataclysm2/wow-update-12803.MPQ"),
-                                        MAKE_PATH("2011 - WoW-Cataclysm2/wow-update-12857.MPQ"),
-                                        MAKE_PATH("2011 - WoW-Cataclysm2/wow-update-12942.MPQ"),
-                                        MAKE_PATH("2011 - WoW-Cataclysm2/wow-update-12984.MPQ"),
-                                        MAKE_PATH("2011 - WoW-Cataclysm2/wow-update-13066.MPQ"),
-                                        MAKE_PATH("2011 - WoW-Cataclysm2/wow-update-13117.MPQ"),
-                                        NULL);
-    }
+//  if(nError == ERROR_SUCCESS)
+//  {
+//      nError = TestOpenPatchedArchive(MAKE_PATH("2011 - WoW-Cataclysm2/locale-enGB.MPQ"),
+//                                      MAKE_PATH("2011 - WoW-Cataclysm2/wow-update-13164.MPQ"),
+//                                      MAKE_PATH("2011 - WoW-Cataclysm2/wow-update-13205.MPQ"),
+//                                      MAKE_PATH("2011 - WoW-Cataclysm2/wow-update-13287.MPQ"),
+//                                      MAKE_PATH("2011 - WoW-Cataclysm2/wow-update-13329.MPQ"),
+//                                      NULL);
+//  }
 
 
     // Remove the working directory

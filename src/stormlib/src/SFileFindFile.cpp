@@ -25,8 +25,6 @@ struct TMPQSearch
 {
     TMPQArchive * ha;                   // Handle to MPQ, where the search runs
     DWORD  dwNextIndex;                 // Next file index to be checked
-    DWORD  dwName1;                     // Lastly found Name1
-    DWORD  dwName2;                     // Lastly found Name2
     char   szSearchMask[1];             // Search mask (variable length)
 };
 
@@ -128,6 +126,35 @@ bool CheckWildCard(const char * szString, const char * szWildCard)
     }
 }
 
+static bool IsBaseFileMissing(
+    TMPQArchive * ha,
+    const char * szFileName1,       // File name with prefix
+    const char * szFileName2,       // File name without prefix
+    LCID lcLocale)
+{
+    TFileEntry * pTempEntry;
+    const char * szFileName;
+    bool bBaseFileMissing = true;
+
+    while(ha != NULL)
+    {
+        // If this patch file uses patch prefix, include it.
+        // Otherwise, use non-prefixed file name
+        szFileName = (ha->szPatchPrefix[0] != 0) ? szFileName1 : szFileName2;
+
+        // Check if the file in this MPQ is patch file or not
+        pTempEntry = GetFileEntryExact(ha, szFileName, lcLocale);
+        if(pTempEntry != NULL)
+            bBaseFileMissing = (pTempEntry->dwFlags & MPQ_FILE_PATCH_FILE) ? true : false;
+
+        // Go one MPQ lower
+        ha = ha->haBase;
+    }
+
+    // Return what we found
+    return bBaseFileMissing;
+}
+
 // Performs one MPQ search
 static int DoMPQSearch(TMPQSearch * hs, SFILE_FIND_DATA * lpFindFileData)
 {
@@ -167,7 +194,7 @@ static int DoMPQSearch(TMPQSearch * hs, SFILE_FIND_DATA * lpFindFileData)
                 {
                     HANDLE hFile;
 
-                    // Open the file by index in order to force getting file name
+                    // Open the file by index in order to check if the file exists
                     if(SFileOpenFileEx((HANDLE)hs->ha, (char *)(DWORD_PTR)dwBlockIndex, SFILE_OPEN_BY_INDEX, &hFile))
                         SFileCloseFile(hFile);
 
@@ -182,13 +209,21 @@ static int DoMPQSearch(TMPQSearch * hs, SFILE_FIND_DATA * lpFindFileData)
 
                 // If we are already in the patch MPQ, we skip all files
                 // that don't have the appropriate patch prefix and are patch files
-                if(nPrefixLength)
+                if(ha->haBase != NULL)
                 {
-                    // We want to return patch files, because the calling
-                    // application might want to update size
-//                  if(pFileEntry->dwFlags & MPQ_FILE_PATCH_FILE)
-//                      goto __SkipThisFile;
-                    if(_strnicmp(szFileName, ha->szPatchPrefix, nPrefixLength))
+                    // If the file has different patch prefix, don't report it
+                    if(nPrefixLength != 0 && _strnicmp(szFileName, ha->szPatchPrefix, nPrefixLength))
+                        goto __SkipThisFile;
+
+                    //
+                    // We need to properly handle the following case:
+                    //
+                    // 1) Base MPQ file doesn't contain the desired file
+                    // 2) First patch MPQ contains the file with MPQ_FILE_PATCH_FILE
+                    // 3) Second patch contains full version of the file (MPQ_FILE_PATCH_FILE is not set)
+                    //
+
+                    if(IsBaseFileMissing(ha, szFileName, szFileName + nPrefixLength, pFileEntry->lcLocale))
                         goto __SkipThisFile;
                 }
 
