@@ -261,7 +261,7 @@ bool WINAPI SFileOpenArchive(
     if(nError == ERROR_SUCCESS)
     {
         // Dump the header
-        DumpMpqHeader(ha->pHeader);
+//      DumpMpqHeader(ha->pHeader);
 
         // W3x Map Protectors use the fact that War3's Storm.dll ignores the MPQ user data,
         // and probably ignores the MPQ format version as well. The trick is to
@@ -281,7 +281,7 @@ bool WINAPI SFileOpenArchive(
 
         // Set the default file flags for (listfile) and (attributes)
         ha->dwFileFlags1 =
-        ha->dwFileFlags2 = MPQ_FILE_ENCRYPTED | MPQ_FILE_COMPRESS |  MPQ_FILE_REPLACEEXISTING;
+        ha->dwFileFlags2 = MPQ_FILE_ENCRYPTED | MPQ_FILE_COMPRESS | MPQ_FILE_REPLACEEXISTING;
 
         // Set the size of file sector
         ha->dwSectorSize = (0x200 << ha->pHeader->wSectorSize);
@@ -290,24 +290,11 @@ bool WINAPI SFileOpenArchive(
         nError = VerifyMpqTablePositions(ha, FileSize);
     }
 
-    // Read the hash table.
-    // "interface.MPQ.part" in trial version of World of Warcraft
-    // has compressed block table and hash table.
+    // Read the hash table. Ignore the result, as hash table is no longer required
+    // Read HET table. Ignore the result, as HET table is no longer required
     if(nError == ERROR_SUCCESS)
     {
-        //
-        // Note: We will NOT check if the hash table is properly decrypted.
-        // Some MPQ protectors corrupt the hash table by rewriting part of it.
-        // Hash table, the way how it works, allows arbitrary values for unused entries.
-        // 
-
-        nError = LoadHashTable(ha);
-    }
-
-    // Read HET table, if present
-    if(nError == ERROR_SUCCESS)
-    {
-        nError = LoadHetTable(ha);
+        nError = LoadAnyHashTable(ha);
     }
 
     // Now, build the file table. It will be built by combining

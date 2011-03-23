@@ -25,8 +25,6 @@ struct TMPQSearch
 {
     TMPQArchive * ha;                   // Handle to MPQ, where the search runs
     DWORD  dwNextIndex;                 // Next file index to be checked
-    DWORD  dwName1;                     // Lastly found Name1
-    DWORD  dwName2;                     // Lastly found Name2
     char   szSearchMask[1];             // Search mask (variable length)
 };
 

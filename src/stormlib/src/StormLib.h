@@ -266,7 +266,6 @@ extern "C" {
 
 // Flags for SFileCreateArchive
 #define MPQ_CREATE_ATTRIBUTES    0x00000001 // Also add the (attributes) file
-#define MPQ_CREATE_NO_MPQ_CHECK  0x00000002 // Used internally by StormLib
 #define MPQ_CREATE_ARCHIVE_V1    0x00000000 // Creates archive of version 1 (size up to 4GB)
 #define MPQ_CREATE_ARCHIVE_V2    0x00010000 // Creates archive of version 2 (larger than 4 GB)
 #define MPQ_CREATE_ARCHIVE_V3    0x00020000 // Creates archive of version 3

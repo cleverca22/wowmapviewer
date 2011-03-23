@@ -434,14 +434,13 @@ static int VerifyRawMpqData(
 {
     hash_state md5_state;
     ULONGLONG DataOffset = ha->MpqPos + ByteOffset;
-    ULONGLONG Md5Offset = ha->MpqPos + ByteOffset + dwDataSize;
     LPBYTE pbDataChunk;
-    LPBYTE pbMD5Array;
-    LPBYTE pbMD5;
+    LPBYTE pbMD5Array1;                 // Calculated MD5 array
+    LPBYTE pbMD5Array2;                 // MD5 array loaded from the MPQ
     DWORD dwBytesInChunk;
     DWORD dwChunkCount;
     DWORD dwChunkSize = ha->pHeader->dwRawChunkSize;
-    BYTE md5[MD5_DIGEST_SIZE];
+    DWORD dwMD5Size;
     int nError = ERROR_SUCCESS;
 
     // Get the number of data chunks to calculate MD5
@@ -449,6 +448,7 @@ static int VerifyRawMpqData(
     dwChunkCount = dwDataSize / dwChunkSize;
     if(dwDataSize % dwChunkSize)
         dwChunkCount++;
+    dwMD5Size = dwChunkCount * MD5_DIGEST_SIZE;
 
     // Allocate space for data chunk and for the MD5 array
     pbDataChunk = ALLOCMEM(BYTE, dwChunkSize);
@@ -456,21 +456,16 @@ static int VerifyRawMpqData(
         return ERROR_NOT_ENOUGH_MEMORY;
 
     // Allocate space for MD5 array
-    pbMD5Array = pbMD5 = ALLOCMEM(BYTE, dwChunkCount * MD5_DIGEST_SIZE);
-    if(pbMD5Array == NULL)
+    pbMD5Array1 = ALLOCMEM(BYTE, dwMD5Size);
+    pbMD5Array2 = ALLOCMEM(BYTE, dwMD5Size);
+    if(pbMD5Array1 == NULL || pbMD5Array2 == NULL)
         nError = ERROR_NOT_ENOUGH_MEMORY;
 
-    // Read the MD5 array
+    // Calculate MD5 of each data chunk
     if(nError == ERROR_SUCCESS)
     {
-        // Read the array of MD5
-        if(!FileStream_Read(ha->pStream, &Md5Offset, pbMD5Array, dwChunkCount * MD5_DIGEST_SIZE))
-            nError = GetLastError();
-    }
+        LPBYTE pbMD5 = pbMD5Array1;
 
-    // Now verify every data chunk
-    if(nError == ERROR_SUCCESS)
-    {
         for(DWORD i = 0; i < dwChunkCount; i++)
         {
             // Get the number of bytes in the chunk
@@ -486,14 +481,7 @@ static int VerifyRawMpqData(
             // Calculate MD5
             md5_init(&md5_state);
             md5_process(&md5_state, pbDataChunk, dwBytesInChunk);
-            md5_done(&md5_state, md5);
-
-            // Compare the MD5
-            if(memcmp(md5, pbMD5, MD5_DIGEST_SIZE))
-            {
-                nError = ERROR_FILE_CORRUPT;
-                break;
-            }
+            md5_done(&md5_state, pbMD5);
 
             // Move pointers and offsets
             DataOffset += dwBytesInChunk;
@@ -502,9 +490,27 @@ static int VerifyRawMpqData(
         }
     }
 
+    // Read the MD5 array
+    if(nError == ERROR_SUCCESS)
+    {
+        // Read the array of MD5
+        if(!FileStream_Read(ha->pStream, &DataOffset, pbMD5Array2, dwMD5Size))
+            nError = GetLastError();
+    }
+
+    // Compare the array of MD5
+    if(nError == ERROR_SUCCESS)
+    {
+        // Compare the MD5
+        if(memcmp(pbMD5Array1, pbMD5Array2, dwMD5Size))
+            nError = ERROR_FILE_CORRUPT;
+    }
+
     // Free memory and return result
-    if(pbMD5Array != NULL)
-        FREEMEM(pbMD5Array);
+    if(pbMD5Array2 != NULL)
+        FREEMEM(pbMD5Array2);
+    if(pbMD5Array1 != NULL)
+        FREEMEM(pbMD5Array1);
     if(pbDataChunk != NULL)
         FREEMEM(pbDataChunk);
     return nError;

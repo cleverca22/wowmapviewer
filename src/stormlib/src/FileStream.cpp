@@ -1335,10 +1335,9 @@ TFileStream * FileStream_OpenEncrypted(const char * szFileName)
                 FREEMEM(pEncryptedStream);
                 pEncryptedStream = NULL;
             }
-
-            FREEMEM(pStream);
         }
 
+        FREEMEM(pStream);
         return pEncryptedStream;
     }
 

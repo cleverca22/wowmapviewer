@@ -71,6 +71,7 @@ bool WINAPI SFileCreateArchive(const char * szMpqName, DWORD dwFlags, DWORD dwMa
     TFileStream * pStream = NULL;           // File stream
     TMPQArchive * ha = NULL;                // MPQ archive handle
     ULONGLONG MpqPos = 0;                   // Position of MPQ header in the file
+    HANDLE hMpq = NULL;
     USHORT wFormatVersion = MPQ_FORMAT_VERSION_1;
     DWORD dwBlockTableSize = 0;             // Initial block table size
     DWORD dwHashTableSize = 0;
@@ -88,16 +89,11 @@ bool WINAPI SFileCreateArchive(const char * szMpqName, DWORD dwFlags, DWORD dwMa
 
     // We verify if the file already exists and if it's a MPQ archive.
     // If yes, we won't allow to overwrite it.
-    if(!(dwFlags & MPQ_CREATE_NO_MPQ_CHECK))
+    if(SFileOpenArchive(szMpqName, 0, dwFlags, &hMpq))
     {
-        HANDLE hMpq = NULL;
-
-        if(SFileOpenArchive(szMpqName, 0, dwFlags, &hMpq))
-        {
-            SFileCloseArchive(hMpq);
-            SetLastError(ERROR_ALREADY_EXISTS);
-            return false;
-        }
+        SFileCloseArchive(hMpq);
+        SetLastError(ERROR_ALREADY_EXISTS);
+        return false;
     }
 
     //
@@ -207,11 +203,7 @@ bool WINAPI SFileCreateArchive(const char * szMpqName, DWORD dwFlags, DWORD dwMa
     // Create initial hash table
     if(nError == ERROR_SUCCESS)
     {
-        ha->pHashTable = ALLOCMEM(TMPQHash, dwHashTableSize);
-        if(ha->pHashTable != NULL)
-            memset(ha->pHashTable, 0xFF, sizeof(TMPQHash) * dwHashTableSize);
-        else
-            nError = ERROR_NOT_ENOUGH_MEMORY;
+        nError = CreateHashTable(ha, dwHashTableSize);
     }
 
     // Create initial HET table, if the caller required an MPQ format 3.0 or newer

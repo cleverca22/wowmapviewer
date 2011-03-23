@@ -490,50 +490,60 @@ static TMPQExtTable * LoadExtTable(
     TMPQArchive * ha,
     ULONGLONG ByteOffset,
     size_t Size,
+    DWORD dwSignature,
     DWORD dwKey)
 {
     TMPQExtTable * pCompressed = NULL;      // Compressed table
-    TMPQExtTable * pExtTable;               // Uncompressed table
+    TMPQExtTable * pExtTable = NULL;        // Uncompressed table
 
-    // Allocate size for the compressed table
-    pExtTable = (TMPQExtTable *)ALLOCMEM(BYTE, Size);
-    if(pExtTable != NULL)
+    // Do nothing if the size is zero
+    if(ByteOffset != 0 && Size != 0)
     {
-        // Load the table from the MPQ
-        ByteOffset += ha->MpqPos;
-        if(!FileStream_Read(ha->pStream, &ByteOffset, pExtTable, (DWORD)Size))
+        // Allocate size for the compressed table
+        pExtTable = (TMPQExtTable *)ALLOCMEM(BYTE, Size);
+        if(pExtTable != NULL)
         {
-            FREEMEM(pExtTable);
-            return NULL;
-        }
-
-        // Swap the ext table header
-        BSWAP_ARRAY32_UNSIGNED(pExtTable, sizeof(TMPQExtTable));
-
-        // Decrypt the block
-        BSWAP_ARRAY32_UNSIGNED(pExtTable + 1, pExtTable->dwDataSize);
-        DecryptMpqBlock(pExtTable + 1, (DWORD)(Size - sizeof(TMPQExtTable)), dwKey);
-        BSWAP_ARRAY32_UNSIGNED(pExtTable + 1, pExtTable->dwDataSize);
-
-        // If the table is compressed, decompress it
-        if((pExtTable->dwDataSize + sizeof(TMPQExtTable)) > Size)
-        {
-            pCompressed = pExtTable;
-            pExtTable = (TMPQExtTable *)ALLOCMEM(BYTE, sizeof(TMPQExtTable) + pCompressed->dwDataSize);
-            if(pExtTable != NULL)
+            // Load the table from the MPQ
+            ByteOffset += ha->MpqPos;
+            if(!FileStream_Read(ha->pStream, &ByteOffset, pExtTable, (DWORD)Size))
             {
-                int cbOutBuffer = (int)pCompressed->dwDataSize;
-                int cbInBuffer = (int)Size;
-
-                // Decompress the XXX block 
-                pExtTable->dwSignature = pCompressed->dwSignature;
-                pExtTable->dwVersion   = pCompressed->dwVersion;
-                pExtTable->dwDataSize  = pCompressed->dwDataSize;
-                SCompDecompress((char *)(pExtTable + 1), &cbOutBuffer, (char *)(pCompressed + 1), cbInBuffer);
+                FREEMEM(pExtTable);
+                return NULL;
             }
 
-            // Free the compressed block
-            FREEMEM(pCompressed);
+            // Swap the ext table header
+            BSWAP_ARRAY32_UNSIGNED(pExtTable, sizeof(TMPQExtTable));
+            if(pExtTable->dwSignature != dwSignature)
+            {
+                FREEMEM(pExtTable);
+                return NULL;
+            }
+
+            // Decrypt the block
+            BSWAP_ARRAY32_UNSIGNED(pExtTable + 1, pExtTable->dwDataSize);
+            DecryptMpqBlock(pExtTable + 1, (DWORD)(Size - sizeof(TMPQExtTable)), dwKey);
+            BSWAP_ARRAY32_UNSIGNED(pExtTable + 1, pExtTable->dwDataSize);
+
+            // If the table is compressed, decompress it
+            if((pExtTable->dwDataSize + sizeof(TMPQExtTable)) > Size)
+            {
+                pCompressed = pExtTable;
+                pExtTable = (TMPQExtTable *)ALLOCMEM(BYTE, sizeof(TMPQExtTable) + pCompressed->dwDataSize);
+                if(pExtTable != NULL)
+                {
+                    int cbOutBuffer = (int)pCompressed->dwDataSize;
+                    int cbInBuffer = (int)Size;
+
+                    // Decompress the XXX block 
+                    pExtTable->dwSignature = pCompressed->dwSignature;
+                    pExtTable->dwVersion   = pCompressed->dwVersion;
+                    pExtTable->dwDataSize  = pCompressed->dwDataSize;
+                    SCompDecompress((char *)(pExtTable + 1), &cbOutBuffer, (char *)(pCompressed + 1), cbInBuffer);
+                }
+
+                // Free the compressed block
+                FREEMEM(pCompressed);
+            }
         }
     }
 
@@ -1186,7 +1196,7 @@ static TMPQBetTable * TranslateBetTable(
                 pbSrcData += BetHeader.dwBetHashArraySize;
 
                 // Dump both tables
-                DumpHetAndBetTable(ha->pHetTable, pBetTable);
+//              DumpHetAndBetTable(ha->pHetTable, pBetTable);
             }
         }
     }
@@ -1661,98 +1671,100 @@ static int BuildFileTable_Classic(
     int nError = ERROR_SUCCESS;
 
     // Sanity checks
-    assert(pHeader->dwBlockTablePos != 0);
-    assert(pHeader->dwBlockTableSize != 0);
     assert(ha->pHashTable != NULL);
 
-    // Allocate space for the block table
-    // Note: pHeader->dwBlockTableSize can be zero !!!
-    pBlockTable = ALLOCMEM(TMPQBlock, ha->dwMaxFileCount);
-    if(pBlockTable != NULL)
+    // Do nothing if the size of the block table is zero
+    if(pHeader->dwBlockTablePos != 0 && pHeader->dwBlockTableSize != 0)
     {
-        ULONGLONG ByteOffset = ha->MpqPos + MAKE_OFFSET64(pHeader->wBlockTablePosHi, pHeader->dwBlockTablePos);
-        TMPQHash * pHashEnd = ha->pHashTable + pHeader->dwHashTableSize;
-        TMPQHash * pHash;
-        DWORD dwTableSize = pHeader->dwBlockTableSize * sizeof(TMPQBlock);
-        DWORD dwCmpSize = (DWORD)pHeader->BlockTableSize64;
-
-        // Fill the block table with zeros
-        memset(pBlockTable, 0, dwTableSize);
-
-        // I have found a MPQ which claimed 0x200 entries in the block table,
-        // but the file was cut and there was only 0x1A0 entries.
-        // We will handle this case properly.
-        if(dwTableSize == dwCmpSize && (ByteOffset + dwTableSize) > FileSize)
+        // Allocate space for the block table
+        // Note: pHeader->dwBlockTableSize can be zero !!!
+        pBlockTable = ALLOCMEM(TMPQBlock, ha->dwMaxFileCount);
+        if(pBlockTable != NULL)
         {
-            pHeader->dwBlockTableSize = (DWORD)((FileSize - ByteOffset) / sizeof(TMPQBlock));
-            pHeader->BlockTableSize64 = pHeader->dwBlockTableSize * sizeof(TMPQBlock);
-            dwTableSize = dwCmpSize = pHeader->dwBlockTableSize * sizeof(TMPQBlock);
-        }
+            ULONGLONG ByteOffset = ha->MpqPos + MAKE_OFFSET64(pHeader->wBlockTablePosHi, pHeader->dwBlockTablePos);
+            TMPQHash * pHashEnd = ha->pHashTable + pHeader->dwHashTableSize;
+            TMPQHash * pHash;
+            DWORD dwTableSize = pHeader->dwBlockTableSize * sizeof(TMPQBlock);
+            DWORD dwCmpSize = (DWORD)pHeader->BlockTableSize64;
 
-        //
-        // One of the first cracked versions of Diablo had block table unencrypted 
-        // StormLib does NOT support such MPQs anymore, as they are incompatible
-        // with compressed block table feature
-        //
+            // Fill the block table with zeros
+            memset(pBlockTable, 0, dwTableSize);
 
-        // Load the block table
-        nError = LoadMpqTable(ha, ByteOffset, pBlockTable, dwCmpSize, dwTableSize, MPQ_KEY_BLOCK_TABLE);
-        if(nError == ERROR_SUCCESS)
-        {
-            // Defense against MPQs that that claim block table to be bigger than it really is
-            FixBlockTableSize(ha, pBlockTable, pHeader->dwBlockTableSize);
-
-            // Merge the block table to the file table
-            for(pHash = ha->pHashTable; pHash < pHashEnd; pHash++)
+            // I have found a MPQ which claimed 0x200 entries in the block table,
+            // but the file was cut and there was only 0x1A0 entries.
+            // We will handle this case properly.
+            if(dwTableSize == dwCmpSize && (ByteOffset + dwTableSize) > FileSize)
             {
-                if(pHash->dwBlockIndex < pHeader->dwBlockTableSize)
+                pHeader->dwBlockTableSize = (DWORD)((FileSize - ByteOffset) / sizeof(TMPQBlock));
+                pHeader->BlockTableSize64 = pHeader->dwBlockTableSize * sizeof(TMPQBlock);
+                dwTableSize = dwCmpSize = pHeader->dwBlockTableSize * sizeof(TMPQBlock);
+            }
+
+            //
+            // One of the first cracked versions of Diablo had block table unencrypted 
+            // StormLib does NOT support such MPQs anymore, as they are incompatible
+            // with compressed block table feature
+            //
+
+            // Load the block table
+            nError = LoadMpqTable(ha, ByteOffset, pBlockTable, dwCmpSize, dwTableSize, MPQ_KEY_BLOCK_TABLE);
+            if(nError == ERROR_SUCCESS)
+            {
+                // Defense against MPQs that that claim block table to be bigger than it really is
+                FixBlockTableSize(ha, pBlockTable, pHeader->dwBlockTableSize);
+
+                // Merge the block table to the file table
+                for(pHash = ha->pHashTable; pHash < pHashEnd; pHash++)
                 {
-                    pBlock = pBlockTable + pHash->dwBlockIndex;
-
-                    //
-                    // Yet another silly map protector: For each valid file,
-                    // there are 4 items in the hash table, that appears to be valid:
-                    //
-                    //   a6d79af0 e61a0932 001e0000 0000770b <== Fake valid
-                    //   a6d79af0 e61a0932 0000d761 0000dacb <== Fake valid
-                    //   a6d79af0 e61a0932 00000000 0000002f <== Real file entry
-                    //   a6d79af0 e61a0932 00005a4f 000093bc <== Fake valid
-                    // 
-
-                    if(!(pBlock->dwFlags & ~MPQ_FILE_VALID_FLAGS) && (pBlock->dwFlags & MPQ_FILE_EXISTS))
+                    if(pHash->dwBlockIndex < pHeader->dwBlockTableSize)
                     {
-                        // Get the entry
-                        pFileEntry = pFileTable + pHash->dwBlockIndex;
+                        pBlock = pBlockTable + pHash->dwBlockIndex;
 
-                        // Fill the entry
-                        pFileEntry->ByteOffset  = pBlock->dwFilePos;
-                        pFileEntry->dwHashIndex = (DWORD)(pHash - ha->pHashTable);
-                        pFileEntry->dwFileSize  = pBlock->dwFSize;
-                        pFileEntry->dwCmpSize   = pBlock->dwCSize;
-                        pFileEntry->dwFlags     = pBlock->dwFlags;
-                        pFileEntry->lcLocale    = pHash->lcLocale;
-                        pFileEntry->wPlatform   = pHash->wPlatform;
-                    }
-                    else
-                    {
-                        // If the hash table entry doesn't point to the valid file item,
-                        // we invalidate the entire hash table entry
-                        pHash->dwName1      = 0xFFFFFFFF;
-                        pHash->dwName2      = 0xFFFFFFFF;
-                        pHash->lcLocale     = 0xFFFF;
-                        pHash->wPlatform    = 0xFFFF;
-                        pHash->dwBlockIndex = HASH_ENTRY_DELETED;
+                        //
+                        // Yet another silly map protector: For each valid file,
+                        // there are 4 items in the hash table, that appears to be valid:
+                        //
+                        //   a6d79af0 e61a0932 001e0000 0000770b <== Fake valid
+                        //   a6d79af0 e61a0932 0000d761 0000dacb <== Fake valid
+                        //   a6d79af0 e61a0932 00000000 0000002f <== Real file entry
+                        //   a6d79af0 e61a0932 00005a4f 000093bc <== Fake valid
+                        // 
+
+                        if(!(pBlock->dwFlags & ~MPQ_FILE_VALID_FLAGS) && (pBlock->dwFlags & MPQ_FILE_EXISTS))
+                        {
+                            // Get the entry
+                            pFileEntry = pFileTable + pHash->dwBlockIndex;
+
+                            // Fill the entry
+                            pFileEntry->ByteOffset  = pBlock->dwFilePos;
+                            pFileEntry->dwHashIndex = (DWORD)(pHash - ha->pHashTable);
+                            pFileEntry->dwFileSize  = pBlock->dwFSize;
+                            pFileEntry->dwCmpSize   = pBlock->dwCSize;
+                            pFileEntry->dwFlags     = pBlock->dwFlags;
+                            pFileEntry->lcLocale    = pHash->lcLocale;
+                            pFileEntry->wPlatform   = pHash->wPlatform;
+                        }
+                        else
+                        {
+                            // If the hash table entry doesn't point to the valid file item,
+                            // we invalidate the entire hash table entry
+                            pHash->dwName1      = 0xFFFFFFFF;
+                            pHash->dwName2      = 0xFFFFFFFF;
+                            pHash->lcLocale     = 0xFFFF;
+                            pHash->wPlatform    = 0xFFFF;
+                            pHash->dwBlockIndex = HASH_ENTRY_DELETED;
+                        }
                     }
                 }
             }
-        }
 
-        // Free the block table
-        FREEMEM(pBlockTable);
-    }
-    else
-    {
-        nError = ERROR_NOT_ENOUGH_MEMORY;
+            // Free the block table
+            FREEMEM(pBlockTable);
+        }
+        else
+        {
+            nError = ERROR_NOT_ENOUGH_MEMORY;
+        }
     }
 
     // Load the hi-block table
@@ -1812,113 +1824,122 @@ static int BuildFileTable_HetBet(
     TBitArray * pBitArray;
     DWORD dwBitPosition = 0;
     DWORD i;
-    int nError = ERROR_SUCCESS;
+    int nError = ERROR_FILE_CORRUPT;
 
     // Load the BET table from the MPQ
-    if(nError == ERROR_SUCCESS)
+    pExtTable = LoadExtTable(ha, pHeader->BetTablePos64, (size_t)pHeader->BetTableSize64, BET_TABLE_SIGNATURE, MPQ_KEY_BLOCK_TABLE);
+    if(pExtTable != NULL)
     {
-        pExtTable = LoadExtTable(ha, pHeader->BetTablePos64, (size_t)pHeader->BetTableSize64, MPQ_KEY_BLOCK_TABLE);
-        if(pExtTable != NULL)
+        // Do nothing if the BET table is missing or corrupt
+        pBetTable = TranslateBetTable(ha, pExtTable);
+        if(pBetTable != NULL)
         {
-            pBetTable = TranslateBetTable(ha, pExtTable);
-            if(pBetTable == NULL)
-                nError = ERROR_FILE_CORRUPT;
-            FREEMEM(pExtTable);
-        }
-        else
-            nError = ERROR_FILE_CORRUPT;
-    }
-
-    // Step one: Fill the indexes to the HET table
-    for(i = 0; i < pHetTable->dwHashTableSize; i++)
-    {
-        DWORD dwFileIndex = 0;
-
-        // Is the entry in the HET table occupied?
-        if(pHetTable->pHetHashes[i] != 0)
-        {
-            // Load the index to the BET table
-            pHetTable->pBetIndexes->GetBits(pHetTable->dwIndexSizeTotal * i,
-                                            pHetTable->dwIndexSize,
-                                           &dwFileIndex,
-                                            4);
-            // Overflow test
-            if(dwFileIndex < ha->dwMaxFileCount)
+            // Step one: Fill the indexes to the HET table
+            for(i = 0; i < pHetTable->dwHashTableSize; i++)
             {
-                // Get the file entry and save HET index
-                pFileEntry = pFileTable + dwFileIndex;
-                pFileEntry->dwHetIndex = i;
+                DWORD dwFileIndex = 0;
 
-                // Load the BET hash
-                pBetTable->pBetHashes->GetBits(pBetTable->dwBetHashSizeTotal * dwFileIndex,
-                                               pBetTable->dwBetHashSize,
-                                              &pFileEntry->BetHash,
-                                               8);
+                // Is the entry in the HET table occupied?
+                if(pHetTable->pHetHashes[i] != 0)
+                {
+                    // Load the index to the BET table
+                    pHetTable->pBetIndexes->GetBits(pHetTable->dwIndexSizeTotal * i,
+                                                    pHetTable->dwIndexSize,
+                                                   &dwFileIndex,
+                                                    4);
+                    // Overflow test
+                    if(dwFileIndex < ha->dwMaxFileCount)
+                    {
+                        // Get the file entry and save HET index
+                        pFileEntry = pFileTable + dwFileIndex;
+                        pFileEntry->dwHetIndex = i;
+
+                        // Load the BET hash
+                        pBetTable->pBetHashes->GetBits(pBetTable->dwBetHashSizeTotal * dwFileIndex,
+                                                       pBetTable->dwBetHashSize,
+                                                      &pFileEntry->BetHash,
+                                                       8);
+                    }
+                }
             }
-        }
-    }
 
-    // Go through the entire BET table and convert it to the file table.
-    // Note: Only do this when there is no hash+block table
-    // (in that case, the file table is already loaded)
-    if(ha->pHashTable == NULL)
-    {
-        pFileEntry = pFileTable;
-        pBitArray = pBetTable->pFileTable; 
-        for(i = 0; i < pBetTable->dwMaxFileCount; i++)
-        {
-            DWORD dwFlagIndex = 0;
-
-            // Read the file position
-            pBitArray->GetBits(dwBitPosition + pBetTable->dwBitIndex_FilePos,
-                               pBetTable->dwBitCount_FilePos,
-                              &pFileEntry->ByteOffset,
-                               8);
-
-            // Read the file size
-            pBitArray->GetBits(dwBitPosition + pBetTable->dwBitIndex_FileSize,
-                               pBetTable->dwBitCount_FileSize,
-                              &pFileEntry->dwFileSize,
-                               4);
-
-            // Read the compressed size
-            pBitArray->GetBits(dwBitPosition + pBetTable->dwBitIndex_CmpSize,
-                               pBetTable->dwBitCount_CmpSize,
-                              &pFileEntry->dwCmpSize,
-                               4);
-
-
-            // Read the flag index
-            if(pBetTable->dwFlagCount != 0)
+            // Go through the entire BET table and convert it to the file table.
+            pFileEntry = pFileTable;
+            pBitArray = pBetTable->pFileTable; 
+            for(i = 0; i < pBetTable->dwMaxFileCount; i++)
             {
-                pBitArray->GetBits(dwBitPosition + pBetTable->dwBitIndex_FlagIndex,
-                                   pBetTable->dwBitCount_FlagIndex,
-                                  &dwFlagIndex,
+                DWORD dwFlagIndex = 0;
+
+                // Read the file position
+                pBitArray->GetBits(dwBitPosition + pBetTable->dwBitIndex_FilePos,
+                                   pBetTable->dwBitCount_FilePos,
+                                  &pFileEntry->ByteOffset,
+                                   8);
+
+                // Read the file size
+                pBitArray->GetBits(dwBitPosition + pBetTable->dwBitIndex_FileSize,
+                                   pBetTable->dwBitCount_FileSize,
+                                  &pFileEntry->dwFileSize,
                                    4);
 
-                pFileEntry->dwFlags = pBetTable->pFileFlags[dwFlagIndex];
+                // Read the compressed size
+                pBitArray->GetBits(dwBitPosition + pBetTable->dwBitIndex_CmpSize,
+                                   pBetTable->dwBitCount_CmpSize,
+                                  &pFileEntry->dwCmpSize,
+                                   4);
+
+
+                // Read the flag index
+                if(pBetTable->dwFlagCount != 0)
+                {
+                    pBitArray->GetBits(dwBitPosition + pBetTable->dwBitIndex_FlagIndex,
+                                       pBetTable->dwBitCount_FlagIndex,
+                                      &dwFlagIndex,
+                                       4);
+
+                    pFileEntry->dwFlags = pBetTable->pFileFlags[dwFlagIndex];
+                }
+
+                //
+                // TODO: Locale (?)
+                //
+
+                // Move the current bit position
+                dwBitPosition += pBetTable->dwTableEntrySize;
+                pFileEntry++;
             }
 
-            //
-            // TODO: Locale (?)
-            //
-
-            // Set the remaining variables
-            pFileEntry->dwHashIndex = HASH_ENTRY_FREE;
-
-            // Move the current bit position
-            dwBitPosition += pBetTable->dwTableEntrySize;
-            pFileEntry++;
+            // Set the current size of the file table
+            ha->dwFileTableSize = pBetTable->dwMaxFileCount;
+            FreeBetTable(pBetTable);
+            nError = ERROR_SUCCESS;
         }
+
+        // Free the loaded extended table
+        FREEMEM(pExtTable);
     }
 
-    // Set the current size of the file table
-    ha->dwFileTableSize = pBetTable->dwMaxFileCount;
-
-    // Free the BET table
-    if(pBetTable != NULL)
-        FreeBetTable(pBetTable);
     return nError;
+}
+
+int CreateHashTable(TMPQArchive * ha, DWORD dwHashTableSize)
+{
+    TMPQHash * pHashTable;
+
+    // Sanity checks
+    assert((dwHashTableSize & (dwHashTableSize - 1)) == 0);
+    assert(ha->pHashTable == NULL);
+
+    // Create the hash table
+    pHashTable = ALLOCMEM(TMPQHash, dwHashTableSize);
+    if(pHashTable == NULL)
+        return ERROR_NOT_ENOUGH_MEMORY;
+
+    // Fill it
+    memset(pHashTable, 0xFF, dwHashTableSize * sizeof(TMPQHash));
+    ha->dwMaxFileCount = dwHashTableSize;
+    ha->pHashTable = pHashTable;
+    return ERROR_SUCCESS;
 }
 
 int LoadHashTable(TMPQArchive * ha)
@@ -1926,51 +1947,47 @@ int LoadHashTable(TMPQArchive * ha)
     TMPQHeader * pHeader = ha->pHeader;
     ULONGLONG ByteOffset;
     TMPQHash * pHashTable;
-    DWORD dwHashTableSize = pHeader->dwHashTableSize;
     DWORD dwTableSize;
+    DWORD dwCmpSize;
     int nError;
 
     // If the MPQ has no hash table, do nothing
     if(pHeader->dwHashTablePos == 0 && pHeader->wHashTablePosHi == 0)
         return ERROR_SUCCESS;
 
-    // If the hash table size is zero, we treat the MPQ as unfinished
-    // and set an initial table size.
-    if(dwHashTableSize == 0)
-        dwHashTableSize = HASH_TABLE_SIZE_DEFAULT;
-    dwTableSize = dwHashTableSize * sizeof(TMPQHash);
+    // If the hash table size is zero, do nothing
+    if(pHeader->dwHashTableSize == 0)
+        return ERROR_SUCCESS;
 
     // Allocate buffer for the hash table
-    pHashTable = ALLOCMEM(TMPQHash, dwHashTableSize);
+    dwTableSize = pHeader->dwHashTableSize * sizeof(TMPQHash);
+    pHashTable = ALLOCMEM(TMPQHash, pHeader->dwHashTableSize);
     if(pHashTable == NULL)
         return ERROR_NOT_ENOUGH_MEMORY;
 
-    // Load the hash table, if there is any
-    if(pHeader->dwHashTableSize != 0)
-    {
-        // Compressed size of the hash table
-        DWORD dwCmpSize = (DWORD)pHeader->HashTableSize64;
+    // Compressed size of the hash table
+    dwCmpSize = (DWORD)pHeader->HashTableSize64;
 
-        // Load the table from the MPQ, with decompression
-        ByteOffset = ha->MpqPos + MAKE_OFFSET64(pHeader->wHashTablePosHi, pHeader->dwHashTablePos);
-        nError = LoadMpqTable(ha, ByteOffset, pHashTable, dwCmpSize, dwTableSize, MPQ_KEY_HASH_TABLE);
-        if(nError != ERROR_SUCCESS)
-        {
-            FREEMEM(pHashTable);
-            pHashTable = NULL;
-            return nError;
-        }
-    }
-    else
+    // 
+    // Load the table from the MPQ, with decompression
+    //
+    // Note: We will NOT check if the hash table is properly decrypted.
+    // Some MPQ protectors corrupt the hash table by rewriting part of it.
+    // Hash table, the way how it works, allows arbitrary values for unused entries.
+    // 
+
+    ByteOffset = ha->MpqPos + MAKE_OFFSET64(pHeader->wHashTablePosHi, pHeader->dwHashTablePos);
+    nError = LoadMpqTable(ha, ByteOffset, pHashTable, dwCmpSize, dwTableSize, MPQ_KEY_HASH_TABLE);
+    if(nError != ERROR_SUCCESS)
     {
-        // Make the hash table empty
-        memset(pHashTable, 0xFF, dwTableSize);
-        pHeader->dwHashTableSize = dwHashTableSize;
+        FREEMEM(pHashTable);
+        pHashTable = NULL;
+        return nError;
     }
 
     // Set the maximum file count to the size of the hash table
     // Store the hash table to the MPQ
-    ha->dwMaxFileCount = dwHashTableSize;
+    ha->dwMaxFileCount = pHeader->dwHashTableSize;
     ha->pHashTable = pHashTable;
     return ERROR_SUCCESS;
 }
@@ -1986,33 +2003,52 @@ int LoadHetTable(TMPQArchive * ha)
     if(pHeader->HetTablePos64 != 0)
     {
         // Attempt to load the HET table (Hash Extended Table)
-        pExtTable = LoadExtTable(ha, pHeader->HetTablePos64, (size_t)pHeader->HetTableSize64, MPQ_KEY_HASH_TABLE);
+        pExtTable = LoadExtTable(ha, pHeader->HetTablePos64, (size_t)pHeader->HetTableSize64, HET_TABLE_SIGNATURE, MPQ_KEY_HASH_TABLE);
         if(pExtTable != NULL)
         {
+            // If succeeded, we have to limit the maximum file count
+            // to the values saved in the HET table
+            // If loading HET table fails, we ignore the result.
             ha->pHetTable = TranslateHetTable(pExtTable);
-            if(ha->pHetTable == NULL)
-                nError = ERROR_FILE_CORRUPT;
+            if(ha->pHetTable != NULL)
+                ha->dwMaxFileCount = ha->pHetTable->dwMaxFileCount;
+
             FREEMEM(pExtTable);
         }
-        else
-            nError = ERROR_FILE_CORRUPT;
 
-        // If succeeded, we have to limit the maximum file count
-        // to the values saved in the HET table
-        if(nError == ERROR_SUCCESS)
-        {
-            ha->dwMaxFileCount = ha->pHetTable->dwMaxFileCount;
-        }
+        // If the HET hable failed to load, it's corrupt.
+        if(ha->pHetTable == NULL)
+            nError = ERROR_FILE_CORRUPT;
     }
 
     return nError;
 }
 
-int BuildFileTable(TMPQArchive * ha, ULONGLONG FileSize)
+int LoadAnyHashTable(TMPQArchive * ha)
 {
     TMPQHeader * pHeader = ha->pHeader;
+    bool bHashTableLoaded = false;
+
+    // If the MPQ archive is empty, don't bother trying to load anything
+    if(pHeader->dwHashTableSize == 0 && pHeader->HetTableSize64 == 0)
+        return CreateHashTable(ha, HASH_TABLE_SIZE_DEFAULT);
+
+    // Try to load HET table
+    if(LoadHetTable(ha) == ERROR_SUCCESS)
+        bHashTableLoaded = true;
+
+    // Try to load the classic hash table
+    if(LoadHashTable(ha) == ERROR_SUCCESS)
+        bHashTableLoaded = true;
+        
+    return bHashTableLoaded ? ERROR_SUCCESS : ERROR_FILE_CORRUPT;
+}
+
+
+int BuildFileTable(TMPQArchive * ha, ULONGLONG FileSize)
+{
     TFileEntry * pFileTable;
-    int nError = ERROR_SUCCESS;
+    bool bFileTableCreated = false;
 
     // Sanity checks
     assert(ha->dwFileTableSize == 0);
@@ -2026,24 +2062,36 @@ int BuildFileTable(TMPQArchive * ha, ULONGLONG FileSize)
     // Fill the table with zeros
     memset(pFileTable, 0, ha->dwMaxFileCount * sizeof(TFileEntry));
 
-    // If we have block table, we use it to build the file table
-    if(ha->pHashTable != NULL && pHeader->dwBlockTableSize != 0)
-        nError = BuildFileTable_Classic(ha, pFileTable, FileSize);
+    // If we have HET table, we load file table from the BET table
+    // Note: If BET table is corrupt or missing, we set the archive as read only
+    if(ha->pHetTable != NULL)
+    {
+        if(BuildFileTable_HetBet(ha, pFileTable) != ERROR_SUCCESS)
+            ha->dwFlags |= MPQ_FLAG_READ_ONLY;
+        else
+            bFileTableCreated = true;
+    }
 
-    // If we have HET and BET table, we use those to build the file table
-    if(ha->pHetTable != NULL && pHeader->BetTableSize64 != 0)
-        nError = BuildFileTable_HetBet(ha, pFileTable);
-
+    // If we have hash table, we load the file table from the block table
+    // Note: If block table is corrupt or missing, we set the archive as read only
+    if(ha->pHashTable != NULL)
+    {
+        if(BuildFileTable_Classic(ha, pFileTable, FileSize) != ERROR_SUCCESS)
+            ha->dwFlags |= MPQ_FLAG_READ_ONLY;
+        else
+            bFileTableCreated = true;
+    }
+    
     // If something failed, we free the file table entry
-    if(nError != ERROR_SUCCESS)
+    if(bFileTableCreated == false)
     {
         FREEMEM(pFileTable);
-        pFileTable = NULL;
+        return ERROR_FILE_CORRUPT;
     }
 
     // Assign it to the archive structure
     ha->pFileTable = pFileTable;
-    return nError;
+    return ERROR_SUCCESS;
 }
 
 // Saves MPQ header, hash table, block table and hi-block table.

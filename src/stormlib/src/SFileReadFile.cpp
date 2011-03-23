@@ -930,15 +930,13 @@ bool WINAPI SFileGetFileName(HANDLE hFile, char * szFileName)
         break;                              \
     }
 
-#define GIVE_32BIT_VALUE(val)               \
-    cbLengthNeeded = sizeof(DWORD);         \
-    if(cbFileInfo < cbLengthNeeded)         \
-    {                                       \
-        nError = ERROR_INSUFFICIENT_BUFFER; \
-        break;                              \
-    }                                       \
-    *((LPDWORD)pvFileInfo) = val;
+#define RESULT_IS_64BIT_VALUE(val)          \
+    cbLengthNeeded = sizeof(ULONGLONG);     \
+    ResultValue = val;
 
+#define RESULT_IS_32BIT_VALUE(val)          \
+    cbLengthNeeded = sizeof(DWORD);         \
+    ResultValue = val;
 
 bool WINAPI SFileGetFileInfo(
     HANDLE hMpqOrFile,
@@ -947,8 +945,8 @@ bool WINAPI SFileGetFileInfo(
     DWORD cbFileInfo,
     LPDWORD pcbLengthNeeded)
 {
-    ULONGLONG * pFileTime;
     TMPQArchive * ha = (TMPQArchive *)hMpqOrFile;
+    ULONGLONG ResultValue = 0;
     TMPQBlock * pBlock;
     TMPQFile * hf = (TMPQFile *)hMpqOrFile;
     DWORD cbLengthNeeded = 0;
@@ -973,27 +971,27 @@ bool WINAPI SFileGetFileInfo(
 
         case SFILE_INFO_ARCHIVE_SIZE:       // Size of the archive
             VERIFY_MPQ_HANDLE(ha);
-            GIVE_32BIT_VALUE(ha->pHeader->dwArchiveSize);
+            RESULT_IS_32BIT_VALUE(ha->pHeader->dwArchiveSize);
             break;
 
         case SFILE_INFO_MAX_FILE_COUNT:     // Max. number of files in the MPQ
             VERIFY_MPQ_HANDLE(ha);
-            GIVE_32BIT_VALUE(ha->dwMaxFileCount);
+            RESULT_IS_32BIT_VALUE(ha->dwMaxFileCount);
             break;
 
         case SFILE_INFO_HASH_TABLE_SIZE:    // Size of the hash table
             VERIFY_MPQ_HANDLE(ha);
-            GIVE_32BIT_VALUE(ha->pHeader->dwHashTableSize);
+            RESULT_IS_32BIT_VALUE(ha->pHeader->dwHashTableSize);
             break;
 
         case SFILE_INFO_BLOCK_TABLE_SIZE:   // Size of the block table
             VERIFY_MPQ_HANDLE(ha);
-            GIVE_32BIT_VALUE(ha->pHeader->dwBlockTableSize);
+            RESULT_IS_32BIT_VALUE(ha->pHeader->dwBlockTableSize);
             break;
 
         case SFILE_INFO_SECTOR_SIZE:
             VERIFY_MPQ_HANDLE(ha);
-            GIVE_32BIT_VALUE(ha->dwSectorSize);
+            RESULT_IS_32BIT_VALUE(ha->dwSectorSize);
             break;
 
         case SFILE_INFO_HASH_TABLE:
@@ -1031,69 +1029,75 @@ bool WINAPI SFileGetFileInfo(
         case SFILE_INFO_NUM_FILES:
             VERIFY_MPQ_HANDLE(ha);
             dwFileCount = GetMpqFileCount(ha);
-            GIVE_32BIT_VALUE(dwFileCount);
+            RESULT_IS_32BIT_VALUE(dwFileCount);
             break;
 
         case SFILE_INFO_STREAM_FLAGS:   // Stream flags for the MPQ. See STREAM_FLAG_XXX
             VERIFY_MPQ_HANDLE(ha);
-            GIVE_32BIT_VALUE(ha->pStream->StreamFlags);
+            RESULT_IS_32BIT_VALUE(ha->pStream->StreamFlags);
             break;
 
         case SFILE_INFO_IS_READ_ONLY:
             VERIFY_MPQ_HANDLE(ha);
 
             dwIsReadOnly = ((ha->pStream->StreamFlags & STREAM_FLAG_READ_ONLY) || (ha->dwFlags & MPQ_FLAG_READ_ONLY));
-            GIVE_32BIT_VALUE(dwIsReadOnly);
+            RESULT_IS_32BIT_VALUE(dwIsReadOnly);
             break;
 
         case SFILE_INFO_HASH_INDEX:
             VERIFY_FILE_HANDLE(hf);
-            GIVE_32BIT_VALUE(hf->pFileEntry->dwHashIndex);
+            RESULT_IS_32BIT_VALUE(hf->pFileEntry->dwHashIndex);
             break;
 
         case SFILE_INFO_CODENAME1:
             VERIFY_FILE_HANDLE(hf);
-            GIVE_32BIT_VALUE(ha->pHashTable[hf->pFileEntry->dwHashIndex].dwName1);
+            if(ha->pHashTable != NULL)
+            {
+                RESULT_IS_32BIT_VALUE(ha->pHashTable[hf->pFileEntry->dwHashIndex].dwName1);
+            }
             break;
 
         case SFILE_INFO_CODENAME2:
             VERIFY_FILE_HANDLE(hf);
-            GIVE_32BIT_VALUE(ha->pHashTable[hf->pFileEntry->dwHashIndex].dwName2);
+            if(ha->pHashTable != NULL)
+            {
+                RESULT_IS_32BIT_VALUE(ha->pHashTable[hf->pFileEntry->dwHashIndex].dwName2);
+            }
             break;
 
         case SFILE_INFO_LOCALEID:
             VERIFY_FILE_HANDLE(hf);
-            GIVE_32BIT_VALUE(hf->pFileEntry->lcLocale);
+            RESULT_IS_32BIT_VALUE(hf->pFileEntry->lcLocale);
             break;
 
         case SFILE_INFO_BLOCKINDEX:
             VERIFY_FILE_HANDLE(hf);
-            GIVE_32BIT_VALUE((DWORD)(hf->pFileEntry - hf->ha->pFileTable));
+            RESULT_IS_32BIT_VALUE((DWORD)(hf->pFileEntry - hf->ha->pFileTable));
             break;
 
         case SFILE_INFO_FILE_SIZE:
             VERIFY_FILE_HANDLE(hf);
-            GIVE_32BIT_VALUE(hf->pFileEntry->dwFileSize);
+            RESULT_IS_32BIT_VALUE(hf->pFileEntry->dwFileSize);
             break;
 
         case SFILE_INFO_COMPRESSED_SIZE:
             VERIFY_FILE_HANDLE(hf);
-            GIVE_32BIT_VALUE(hf->pFileEntry->dwCmpSize);
+            RESULT_IS_32BIT_VALUE(hf->pFileEntry->dwCmpSize);
             break;
 
         case SFILE_INFO_FLAGS:
             VERIFY_FILE_HANDLE(hf);
-            GIVE_32BIT_VALUE(hf->pFileEntry->dwFlags);
+            RESULT_IS_32BIT_VALUE(hf->pFileEntry->dwFlags);
             break;
 
         case SFILE_INFO_POSITION:
             VERIFY_FILE_HANDLE(hf);
-            GIVE_32BIT_VALUE((DWORD)hf->pFileEntry->ByteOffset);
+            RESULT_IS_32BIT_VALUE((DWORD)hf->pFileEntry->ByteOffset);
             break;
 
         case SFILE_INFO_KEY:
             VERIFY_FILE_HANDLE(hf);
-            GIVE_32BIT_VALUE(hf->dwFileKey);
+            RESULT_IS_32BIT_VALUE(hf->dwFileKey);
             break;
 
         case SFILE_INFO_KEY_UNFIXED:
@@ -1101,21 +1105,12 @@ bool WINAPI SFileGetFileInfo(
             dwFileKey = hf->dwFileKey;
             if(hf->pFileEntry->dwFlags & MPQ_FILE_FIX_KEY)
                 dwFileKey = (dwFileKey ^ hf->pFileEntry->dwFileSize) - (DWORD)hf->MpqFilePos;
-            GIVE_32BIT_VALUE(dwFileKey);
+            RESULT_IS_32BIT_VALUE(dwFileKey);
             break;
 
         case SFILE_INFO_FILETIME:
             VERIFY_FILE_HANDLE(hf);
-            cbLengthNeeded = sizeof(ULONGLONG);
-            if(cbFileInfo < cbLengthNeeded)
-            {
-                nError = ERROR_INSUFFICIENT_BUFFER;
-                break;
-            }
-
-            // Pre-fill the filetime with zeros
-            pFileTime = (ULONGLONG *)pvFileInfo;
-            *pFileTime = hf->pFileEntry->FileTime;
+            RESULT_IS_64BIT_VALUE(hf->pFileEntry->FileTime);
             break;
 
         default:
@@ -1123,10 +1118,21 @@ bool WINAPI SFileGetFileInfo(
             break;
     }
 
-    // If the caller specified pointer to length needed,
-    // give it to him
+    // Check the size
+    if(cbLengthNeeded < cbFileInfo)
+        nError = ERROR_INSUFFICIENT_BUFFER;
+
+    // Give the size to the caller
     if(pcbLengthNeeded != NULL)
         *pcbLengthNeeded = cbLengthNeeded;
+
+    // Give the result to the caller
+    if(cbLengthNeeded == 8)
+        *(PULONGLONG)pvFileInfo = ResultValue;
+    if(cbLengthNeeded == 4)
+        *(PDWORD)pvFileInfo = (DWORD)ResultValue;
+
+    // Set the last error value, if needed
     if(nError != ERROR_SUCCESS)
         SetLastError(nError);
     return (nError == ERROR_SUCCESS);

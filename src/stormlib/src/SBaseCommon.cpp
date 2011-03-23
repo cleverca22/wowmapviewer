@@ -792,7 +792,8 @@ int LoadMpqTable(
     LPBYTE pbToRead = (LPBYTE)pvTable;
     int nError = ERROR_SUCCESS;
 
-    // Is the table compressed ?
+    // "interface.MPQ.part" in trial version of World of Warcraft
+    // has block table and hash table compressed.
     if(dwCompressedSize < dwRealSize)
     {
         // Allocate temporary buffer for holding compressed data
@@ -1109,6 +1110,7 @@ int AllocateSectorChecksums(TMPQFile * hf, bool bLoadFromFile)
     ULONGLONG RawFilePos;
     DWORD dwCompressedSize;
     DWORD dwCrcOffset;                      // Offset of the CRC table, relative to file offset in the MPQ
+    DWORD dwLastIndex;
     DWORD dwCrcSize;
 
     // Caller of AllocateSectorChecksums must ensure these
@@ -1136,8 +1138,15 @@ int AllocateSectorChecksums(TMPQFile * hf, bool bLoadFromFile)
         return ERROR_SUCCESS;
     }
 
+    // Note: I've seen files that had sector offset table with
+    // the size of 0x20 bytes, but they supposed to be only 0x08
+    // (dwDataSize = 0x000059ea, dwSectorSize = 0x00004000)
+    // Probable cause: This is a file that is to be downloaded
+    // from the server as soon as it's accessed by the game.
+    dwLastIndex = (hf->SectorOffsets[0] / sizeof(DWORD)) - 2;
+    dwCompressedSize = hf->SectorOffsets[dwLastIndex + 1] - hf->SectorOffsets[dwLastIndex];
+
     // Check size of the checksums. If zero, there aren't any
-    dwCompressedSize = hf->SectorOffsets[hf->dwSectorCount + 1] - hf->SectorOffsets[hf->dwSectorCount];
     if(dwCompressedSize == 0)
         return ERROR_SUCCESS;
 
@@ -1419,16 +1428,19 @@ void FreeMPQArchive(TMPQArchive *& ha)
             FreeMPQArchive(ha->haPatch);
 
         // Free the file names from the file table
-        for(DWORD i = 0; i < ha->dwFileTableSize; i++)
+        if(ha->pFileTable != NULL)
         {
-            if(ha->pFileTable[i].szFileName != NULL)
-                FREEMEM(ha->pFileTable[i].szFileName);
-            ha->pFileTable[i].szFileName = NULL;
+            for(DWORD i = 0; i < ha->dwFileTableSize; i++)
+            {
+                if(ha->pFileTable[i].szFileName != NULL)
+                    FREEMEM(ha->pFileTable[i].szFileName);
+                ha->pFileTable[i].szFileName = NULL;
+            }
+
+            // Then free all buffers allocated in the archive structure
+            FREEMEM(ha->pFileTable);
         }
 
-        // Then free all buffers allocated in the archive structure
-        if(ha->pFileTable != NULL)
-            FREEMEM(ha->pFileTable);
         if(ha->pHashTable != NULL)
             FREEMEM(ha->pHashTable);
         if(ha->pHetTable != NULL)
