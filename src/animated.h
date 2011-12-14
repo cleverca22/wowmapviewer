@@ -9,6 +9,7 @@
 
 #include "vec3d.h"
 #include "quaternion.h"
+#include "defines.h"
 
 // interpolation functions
 template<class T>

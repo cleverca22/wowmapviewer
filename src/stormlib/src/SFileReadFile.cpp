@@ -13,6 +13,8 @@
 #define __INCLUDE_COMPRESSION__
 #include "StormLib.h"
 #include "StormCommon.h"
+typedef ULONGLONG *PULONGLONG;
+typedef DWORD*  PDWORD;
 
 //-----------------------------------------------------------------------------
 // Local structures

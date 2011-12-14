@@ -84,7 +84,6 @@
   #include <sys/stat.h>
   #include <fcntl.h>
   #include <unistd.h>
-  #include <stdint.h>
   #include <stdlib.h>
   #include <stdio.h>
   #include <stdarg.h>

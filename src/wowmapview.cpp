@@ -54,15 +54,19 @@ void deleteFonts()
 
 int main(int argc, char *argv[])
 {
+	const char *override_game_path = NULL;
 	srand((unsigned int)time(0));
 
 	int xres = 1024;
 	int yres = 768;
 
-	bool usePatch = true;
+	bool usePatch = false;
 
 	for (int i=1; i<argc; i++) {
-		if (!strcmp(argv[i],"-f")) fullscreen = 1;
+		if (!strcmp(argv[i],"-gamepath")) {
+			i++;
+			override_game_path = argv[i];
+		} else if (!strcmp(argv[i],"-f")) fullscreen = 1;
 		else if (!strcmp(argv[i],"-w")) fullscreen = 0;
 		else if (!strcmp(argv[i],"-1024") || !strcmp(argv[i],"-1024x768")) {
 			xres = 1024;
@@ -100,7 +104,10 @@ int main(int argc, char *argv[])
 		else if (!strcmp(argv[i],"-np")) usePatch = false;
 	}
 
-	getGamePath();
+	if (override_game_path) {
+		gamePath.empty();
+		gamePath.append(override_game_path);
+	} else getGamePath();
 
 	gLog(APP_TITLE " " APP_VERSION " " APP_BUILD "\nGame path: %s\n", gamePath.c_str());
 
@@ -108,7 +115,7 @@ int main(int argc, char *argv[])
 	
 	int langID = 0;
 
-	char *locales[] = {"enUS", "enGB", "deDE", "frFR", "zhTW", "ruRU", "esES", "koKR", "zhCN"};
+	const char *locales[] = {"enUS", "enGB", "deDE", "frFR", "zhTW", "ruRU", "esES", "koKR", "zhCN"};
 
 	char path[512];
 	for (size_t i=0; i<9; i++) {
@@ -122,7 +129,6 @@ int main(int argc, char *argv[])
 
 	if (usePatch) {
 		// patch goes first -> fake priority handling
-/*
 		sprintf(path, "%s%s", gamePath.c_str(), "patch-3.MPQ");
 		archives.push_back(new MPQArchive(path));
 
@@ -137,7 +143,6 @@ int main(int argc, char *argv[])
 
 		sprintf(path, "%s%s\\Patch-%s.MPQ", gamePath.c_str(), locales[langID], locales[langID]);
 		archives.push_back(new MPQArchive(path));
-*/
 	}
 
 	const char* archiveNames[] = {"expansion3.MPQ", "expansion2.MPQ", "expansion1.MPQ", "world.MPQ", "sound.MPQ", "art.MPQ"};
@@ -146,17 +151,32 @@ int main(int argc, char *argv[])
 		archives.push_back(new MPQArchive(path));
 	}
 
-	sprintf(path, "%s%s\\expansion3-locale-%s.MPQ", gamePath.c_str(), locales[langID], locales[langID]);
+	sprintf(path, "%s%s/expansion3-locale-%s.MPQ", gamePath.c_str(), locales[langID], locales[langID]);
 	archives.push_back(new MPQArchive(path));
 
-	sprintf(path, "%s%s\\expansion2-locale-%s.MPQ", gamePath.c_str(), locales[langID], locales[langID]);
+	sprintf(path, "%s%s/expansion2-locale-%s.MPQ", gamePath.c_str(), locales[langID], locales[langID]);
 	archives.push_back(new MPQArchive(path));
 
-	sprintf(path, "%s%s\\expansion1-locale-%s.MPQ", gamePath.c_str(), locales[langID], locales[langID]);
+	sprintf(path, "%s%s/expansion1-locale-%s.MPQ", gamePath.c_str(), locales[langID], locales[langID]);
 	archives.push_back(new MPQArchive(path));
 
-	sprintf(path, "%s%s\\locale-%s.MPQ", gamePath.c_str(), locales[langID], locales[langID]);
+	sprintf(path, "%s%s/locale-%s.MPQ", gamePath.c_str(), locales[langID], locales[langID]);
 	archives.push_back(new MPQArchive(path));
+
+	const char *updates[] = { "13914", "14007", "14333", "14480", "14545", "14946", "15005", "15050" };
+	for (size_t i = 0; i < 8; i++) {
+		sprintf(path, "%swow-update-base-%s.MPQ",gamePath.c_str(),updates[i]);
+		archives.push_back(new MPQArchive(path));
+	}
+	for (size_t i = 0; i < 8; i++) {
+		sprintf(path, "%s%s/wow-update-enUS-%s.MPQ", gamePath.c_str(),locales[langID],updates[i] );
+		archives.push_back(new MPQArchive(path));
+	}
+	const char *updates2[] = { "13164", "13205", "13287", "13329", "13596", "13623" };
+	for (size_t i = 0; i < 6; i++) {
+		sprintf(path,"%swow-update-%s.MPQ",gamePath.c_str(),updates2[i]);
+		archives.push_back(new MPQArchive(path));
+	}
 
 	OpenDBs();
 
@@ -191,6 +211,9 @@ int main(int argc, char *argv[])
 
 	bool done = false;
 	t = SDL_GetTicks();
+
+	unsigned int fps_delay = 0;
+
 	while(gStates.size()>0 && !done) {
 		last_t = t;
 		t = SDL_GetTicks();
@@ -237,10 +260,13 @@ int main(int argc, char *argv[])
 			SDL_WM_SetCaption(buf,NULL);
             ft = 0;
 			fcount = 0;
+
+			if (fps > 40) fps_delay += 1000;
+			if (fps < 30) fps_delay -= 2000;
 		}
 
 		video.flip();
-
+		if (fps_delay) usleep(fps_delay);
 	}
 
 

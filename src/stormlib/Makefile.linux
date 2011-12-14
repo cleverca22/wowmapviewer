@@ -30,7 +30,7 @@ OBJS =  src/adpcm/adpcm.o \
 	src/huffman/huff.o \
 	src/sparse/sparse.o \
 	src/FileStream.o \
-	src/SCommon.o \
+	src/SBaseCommon.o \
 	src/SCompression.o \
 	src/SFileAddFile.o \
 	src/SFileAttributes.o \
@@ -43,9 +43,11 @@ OBJS =  src/adpcm/adpcm.o \
 	src/SFileOpenFileEx.o \
         src/SFilePatchArchives.o \
 	src/SFileReadFile.o \
+	src/SBaseFileTable.o \
 	src/SFileVerify.o
 
 COBJS = src/jenkins/lookup3.o \
+	src/zlib/deflate.o src/zlib/trees.o src/zlib/crc32.o src/zlib/zutil.o src/zlib/adler32.o src/zlib/inflate.o src/zlib/inftrees.o src/zlib/inffast.o src/zlib/compress2.o \
         src/libtomcrypt/src/hashes/hash_memory.o \
 	src/libtomcrypt/src/hashes/md5.o \
 	src/libtomcrypt/src/hashes/sha1.o\

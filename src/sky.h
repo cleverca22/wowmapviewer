@@ -5,7 +5,7 @@
 #include "model.h"
 #include "mpq.h"
 #include <vector>
-#include "DBCFile.h"
+#include "dbcfile.h"
 
 struct SkyColor {
 	Vec3D color;

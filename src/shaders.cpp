@@ -1,5 +1,6 @@
 #include "shaders.h"
 #include "wowmapview.h"
+#include "util.h"
 
 bool supportShaders = false;
 

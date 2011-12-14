@@ -91,14 +91,14 @@ void Menu::randBackground()
 	if (bg) delete bg;
 	glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 	
-	char *ui[] = {"MainMenu", "NightElf", "Human", "Dwarf", "Orc", "Tauren", "Scourge"}; //, "Bloodelf", "Deathknight", "Draenei" };
+	const char *ui[] = {"MainMenu", "NightElf", "Human", "Dwarf", "Orc", "Tauren", "Scourge"}; //, "Bloodelf", "Deathknight", "Draenei" };
 	int dark[] = {0,0,1,1,0,0,0,0,1,1};
 	int randnum;
 	do {
 		randnum = randint(0,6);
 	} while (randnum == lastbg);
 	//randnum = 0;
-	char *randui = ui[randnum];
+	const char *randui = ui[randnum];
 	darken = dark[randnum]!=0;
     char path[256];
 	sprintf(path, "Interface\\Glues\\Models\\UI_%s\\UI_%s.mdx", randui, randui);

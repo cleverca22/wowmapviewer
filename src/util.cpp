@@ -2,6 +2,8 @@
 #ifdef _WINDOWS
 #include <windows.h>
 #endif
+#include <stdio.h>
+#include <stdarg.h>
 
 std::string gamePath;
 vector<std::string> mpqArchives;
@@ -10,7 +12,7 @@ vector<std::string> mpqArchives;
 FILE *flog;
 bool glogfirst = true;
 
-void gLog(char *str, ...)
+void gLog(const char *str, ...)
 {
 	if (glogfirst) {
 		flog = fopen("log.txt","w");

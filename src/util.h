@@ -7,7 +7,9 @@
 #include <stdlib.h>
 #include <iostream>
 #include <vector>
+#ifdef _WINDOWS
 #include <io.h>
+#endif
 using namespace std;
 
 extern std::string gamePath;
@@ -27,7 +29,11 @@ extern bool glogfirst;
 #ifdef _WIN64
 	typedef __int64				ssize_t;
 #else
-	typedef __int32				ssize_t;
+	#ifdef _LINUX
+		typedef __ssize_t			ssize_t;
+	#else
+		typedef __int32				ssize_t;
+	#endif
 #endif
 
 bool StartsWith (std::string const &fullString, std::string const &starting);
@@ -39,7 +45,7 @@ std::string GetLast(const char* String);
 void Lower(std::string &text);
 void getGamePath();
 
-void gLog(char *str, ...);
+void gLog(const char *str, ...);
 int file_exists(char *path);
 
 #endif

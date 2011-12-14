@@ -41,7 +41,6 @@ extern PFNGLDELETEBUFFERSARBPROC glDeleteBuffersARB;
 extern PFNGLMAPBUFFERARBPROC glMapBufferARB;
 extern PFNGLUNMAPBUFFERARBPROC glUnmapBufferARB;
 
-extern PFNGLDRAWRANGEELEMENTSPROC glDrawRangeElements;
 
 
 #define GL_BUFFER_OFFSET(i) ((char *)(0) + (i))

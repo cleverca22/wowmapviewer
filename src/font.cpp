@@ -3,6 +3,8 @@
 #include <iostream>
 #include <fstream>
 #include "wowmapview.h"
+#include <stdlib.h>
+#include "util.h"
 
 using namespace std;
 

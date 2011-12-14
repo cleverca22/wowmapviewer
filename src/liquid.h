@@ -22,7 +22,7 @@ class Liquid {
 	float texRepeats;
 
 	void initGeometry(MPQFile &f);
-	void initTextures(char *basename, int first, int last);
+	void initTextures(const char *basename, int first, int last);
 
 	int type;
 	
