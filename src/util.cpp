@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
+#include <unistd.h>
 #include "defines.h"
 
 std::string gamePath;
@@ -38,11 +39,15 @@ void gLog(const char *str, ...)
 
 int file_exists(char *path)
 {
+#ifdef _WINDOWS
 	FILE *f = fopen(path, "r");
 	if (f) {
 		fclose(f);
 		return true;
 	}
+#else
+	if (access(path,R_OK) == 0) return true;
+#endif
 	return false;
 };
 

@@ -406,6 +406,7 @@ struct TGAHeader {
 GLuint loadTGA(const char *filename, bool mipmaps)
 {
 	FILE *f = fopen(filename,"rb");
+	assert(f);
 	TGAHeader h;
 	fread(&h,18,1,f);
 	if (h.datatypecode != 2) return 0;
