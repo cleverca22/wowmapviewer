@@ -123,6 +123,13 @@ int main(int argc, char *argv[])
 		gamePath.append(override_game_path);
 	} else getGamePath();
 
+	char path[512];
+	sprintf(path,"%sart.MPQ");
+	if (!file_exists(path)) {
+		printf("error finding art.MPQ in '%s', is gamepath correct?, try -gamepath fullpass to data/\n",gamePath.c_str());
+		return -1;
+	}
+
 	gLog(APP_TITLE " " APP_VERSION " " APP_BUILD "\nGame path: %s\n", gamePath.c_str());
 
 	std::vector<MPQArchive*> archives;
@@ -131,7 +138,6 @@ int main(int argc, char *argv[])
 
 	const char *locales[] = {"enUS", "enGB", "deDE", "frFR", "zhTW", "ruRU", "esES", "koKR", "zhCN"};
 
-	char path[512];
 	for (size_t i=0; i<9; i++) {
 		sprintf(path, "%s%s\\base-%s.MPQ", gamePath.c_str(), locales[i], locales[i]);
 		if (file_exists(path)) {

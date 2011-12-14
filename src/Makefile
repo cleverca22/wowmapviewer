@@ -8,6 +8,7 @@ clean:
 
 wowmapview: $(objects) stormlib/libStorm.a
 	$(CC) -o $@ $+ -L/usr/X11R6/lib -lSDL -lGL -lGLU -lbz2
+	cp "$@" ../bin/
 
 clean_mpq:
 	libmpq/make clean
