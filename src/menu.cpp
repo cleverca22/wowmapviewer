@@ -352,12 +352,15 @@ void Menu::display(float t, float dt)
 	}
 }
 
-void Menu::keypressed(SDL_KeyboardEvent *e)
-{
+void Menu::keypressed(SDL_KeyboardEvent *e) {
 	if (e->type == SDL_KEYDOWN) {
 		if (e->keysym.sym == SDLK_ESCAPE) {
-            if (cmd == CMD_SELECT_MINIMAP) cmd = CMD_SELECT;
-		    else gPop = true;
+			if (cmd == CMD_SELECT_MINIMAP) {
+				sel = -1;
+				world = 0;
+				
+				cmd = CMD_BACK_TO_MENU;
+			} else gPop = true;
 		}
 	}
 }
