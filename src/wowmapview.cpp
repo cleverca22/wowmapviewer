@@ -60,8 +60,8 @@ void deleteFonts()
 #ifdef _WINDOWS
 // HACK: my stupid compiler wont use main()
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
-	char *argv[] = { "wowmapview.exe", "-w", "-gamepath" , "D:\\World of Warcraft\\Data\\" };
-	return main(4,argv);
+	char *argv[] = { "wowmapview.exe", "-w" };
+	return main(2,argv);
 }
 #endif
 
