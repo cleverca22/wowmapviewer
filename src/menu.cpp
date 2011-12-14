@@ -356,7 +356,8 @@ void Menu::keypressed(SDL_KeyboardEvent *e)
 {
 	if (e->type == SDL_KEYDOWN) {
 		if (e->keysym.sym == SDLK_ESCAPE) {
-		    gPop = true;
+            if (cmd == CMD_SELECT_MINIMAP) cmd = CMD_SELECT;
+		    else gPop = true;
 		}
 	}
 }
