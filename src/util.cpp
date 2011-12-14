@@ -12,6 +12,9 @@ vector<std::string> mpqArchives;
 FILE *flog;
 bool glogfirst = true;
 
+void check_stuff() {
+     assert(sizeof(__int16) == 2);
+}
 void gLog(const char *str, ...)
 {
 	if (glogfirst) {

@@ -33,6 +33,11 @@ float gFPS;
 GLuint ftex;
 Font *f16, *f24, *f32;
 
+#ifdef _WINDOWS
+void usleep(unsigned int x) {
+     Sleep(x / 1000);
+}
+#endif
 
 void initFonts()
 {
@@ -52,10 +57,17 @@ void deleteFonts()
 	delete f32;
 }
 
+// HACK: my stupid compiler wont use main()
+int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+	char *argv[] = { "wowmapview.exe", "-w", "-gamepath" , "D:\\World of Warcraft\\Data\\" };
+	return main(4,argv);
+}
+
 int main(int argc, char *argv[])
 {
 	const char *override_game_path = NULL;
 	srand((unsigned int)time(0));
+	check_stuff();
 
 	int xres = 1024;
 	int yres = 768;
@@ -212,7 +224,7 @@ int main(int argc, char *argv[])
 	bool done = false;
 	t = SDL_GetTicks();
 
-	unsigned int fps_delay = 0;
+	int fps_delay = 0;
 
 	while(gStates.size()>0 && !done) {
 		last_t = t;
@@ -263,6 +275,7 @@ int main(int argc, char *argv[])
 
 			if (fps > 40) fps_delay += 1000;
 			if (fps < 30) fps_delay -= 2000;
+			if (fps_delay < 0) fps_delay = 0;
 		}
 
 		video.flip();

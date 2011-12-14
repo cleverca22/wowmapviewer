@@ -25,7 +25,7 @@ OBJS_CPP = src/adpcm/adpcm.o \
            src/huffman/huff.o \
            src/sparse/sparse.o \
            src/FileStream.o \
-           src/SCommon.o \
+           src/SBaseCommon.o \
            src/SCompression.o \
            src/SFileAddFile.o \
            src/SFileAttributes.o \
@@ -38,6 +38,7 @@ OBJS_CPP = src/adpcm/adpcm.o \
            src/SFileOpenFileEx.o \
            src/SFilePatchArchives.o \
            src/SFileReadFile.o \
+	   src/SBaseFileTable.o \
            src/SFileVerify.o
               
 

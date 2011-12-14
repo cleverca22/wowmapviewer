@@ -17,7 +17,7 @@ public:
 	static const size_t Flags = 4;		// bit field
 	static const size_t Name = 11;		// localisation string
 
-	static std::string getAreaName( int pAreaID );
+	static std::string getAreaName( unsigned int pAreaID );
 };
 
 class MapDB: public DBCFile

@@ -23,6 +23,9 @@ PFNGLDELETEBUFFERSARBPROC glDeleteBuffersARB = NULL;
 PFNGLMAPBUFFERARBPROC glMapBufferARB = NULL;
 PFNGLUNMAPBUFFERARBPROC glUnmapBufferARB = NULL;
 
+#ifdef _WINDOWS
+PFNGLDRAWRANGEELEMENTSPROC glDrawRangeElements = NULL;
+#endif
 
 bool supportCompression = false;
 bool supportMultiTex = false;

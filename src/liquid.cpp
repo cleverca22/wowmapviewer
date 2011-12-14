@@ -299,7 +299,7 @@ void Liquid::draw()
 	}
 }
 
-void Liquid::initTextures(char *basename, int first, int last)
+void Liquid::initTextures(const char *basename, int first, int last)
 {
 	char buf[256];
 	for (int i=first; i<=last; i++) {

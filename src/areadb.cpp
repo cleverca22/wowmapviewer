@@ -27,7 +27,7 @@ void OpenDBs()
 }
 
 
-std::string AreaDB::getAreaName( int pAreaID )
+std::string AreaDB::getAreaName( unsigned int pAreaID )
 {
 	unsigned int regionID = 0;
 	std::string areaName = "";

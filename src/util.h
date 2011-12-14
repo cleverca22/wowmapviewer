@@ -44,7 +44,7 @@ std::string GetLast(const char* String);
 
 void Lower(std::string &text);
 void getGamePath();
-
+void check_stuff();
 void gLog(const char *str, ...);
 int file_exists(char *path);
 
