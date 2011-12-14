@@ -4,6 +4,8 @@
 #endif
 #include <stdio.h>
 #include <stdarg.h>
+#include <assert.h>
+#include "defines.h"
 
 std::string gamePath;
 vector<std::string> mpqArchives;
