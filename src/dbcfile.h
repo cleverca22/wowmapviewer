@@ -4,6 +4,12 @@
 #include <string>
 #include "wowmapview.h"
 
+#ifdef __GNUC__
+#define WARN_IF_UNUSED __attribute__ ((warn_unused_result))
+#else
+#define WARN_IF_UNUSED
+#endif
+
 class DBCFile
 {
 public:
@@ -11,7 +17,7 @@ public:
 	~DBCFile();
 
 	// Open database. It must be openened before it can be used.
-	bool open();
+	bool open() WARN_IF_UNUSED;
 
 	// Database exceptions
 	class Exception
