@@ -124,8 +124,13 @@ int main(int argc, char *argv[])
 	} else getGamePath();
 
 	char path[512];
-	sprintf(path,"%sart.MPQ",gamePath.c_str());
-	if (!file_exists(path)) {
+	const char *test_files[] = { "common.MPQ", "art.MPQ" };
+	bool path_valid = false;
+	for (int i = 0; i < 2; i++) {
+      sprintf(path,"%s%s",gamePath.c_str(),test_files[i]);
+	    if (file_exists(path)) path_valid = true;
+    }
+    if (!path_valid) {
 		printf("error finding art.MPQ in '%s', is gamepath correct?, try -gamepath fullpass to data/\n",gamePath.c_str());
 		return -1;
 	}
