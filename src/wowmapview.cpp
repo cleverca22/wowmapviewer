@@ -185,9 +185,17 @@ int main(int argc, char *argv[])
 	sprintf(path, "%s%s/expansion1-locale-%s.MPQ", gamePath.c_str(), locales[langID], locales[langID]);
 	archives.push_back(new MPQArchive(path));
 
+	MPQArchive *temp;
 	sprintf(path, "%s%s/locale-%s.MPQ", gamePath.c_str(), locales[langID], locales[langID]);
-	archives.push_back(new MPQArchive(path));
+	temp = new MPQArchive(path);
+	archives.push_back(temp);
 
+	/* 
+	 * this can patch maps.dbc to add a new UldumPhaseWreckedCamp map, however the map itself doesnt load due to the patch not being applied right
+	bool ret;
+	ret = SFileOpenPatchArchive(temp->mpq_a,"/home/clever/.wine/drive_c/Program Files/World of Warcraft/Data/wow-update-13164.MPQ","enUS\\",0);
+	printf("patch status %d\n",ret);
+	*/
 	const char *updates[] = { "13914", "14007", "14333", "14480", "14545", "14946", "15005", "15050" };
 	for (size_t i = 0; i < 8; i++) {
 		sprintf(path, "%swow-update-base-%s.MPQ",gamePath.c_str(),updates[i]);
