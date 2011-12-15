@@ -35,6 +35,7 @@ bool DBCFile::open()
 		db_type = 2;
 
 	if (db_type == 0) {
+		gLog("dbc file corrupt %s\n",filename.c_str());
 		f.close();
 		data = NULL;
 		return false;
