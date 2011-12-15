@@ -126,6 +126,7 @@ MPQFile::openFile(const char* filename)
 
 	eof = true;
 	buffer = 0;
+	gLog("cant find file %s in MPQ's\n",filename);
 }
 
 MPQFile::MPQFile(const char* filename):

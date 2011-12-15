@@ -21,6 +21,7 @@ Menu::Menu()
 		gLog("error opening Map.dbc\n");
 		sel = -1;
 		bg = 0;
+		exit(-1);
 		return;
 	}
 	int y=0;
@@ -34,7 +35,11 @@ Menu::Menu()
 		e.font = f16;
 		e.id = i->getInt(0);
 		e.name = i->getString(1);
-		e.description = i->getString(3); // + locale
+		// slot 3 doesnt look like a string!!
+		// http://udw.altervista.org/wiki/index.php?title=Map.dbc
+		int test = i->getInt(3);
+		//e.description = i->getString(3); // + locale
+		gLog("found map %d %s %d\n",e.id,e.name.c_str(),test);
 		if (e.description == "")
 			e.description = e.name;
 
@@ -65,8 +70,9 @@ Menu::Menu()
 		maps.push_back(e);
 
 	}
-	const char *extra_maps[] = { "TheHourOfTwilight" };
-	for (int i = 0; i < 1; i++) {
+	// manualy extracted the patches and guessed the map names
+	const char *extra_maps[] = { "TheHourOfTwilight", "DarkmoonFaire" };
+	for (int i = 0; i < 2; i++) {
 		MapEntry e;
 		e.font = f16;
 		e.id = 1; // i think this only effects the sky right now
