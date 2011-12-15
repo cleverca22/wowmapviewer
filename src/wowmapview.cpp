@@ -197,11 +197,14 @@ int main(int argc, char *argv[])
 		sprintf(path, "%s%s/wow-update-enUS-%s.MPQ", gamePath.c_str(),locales[langID],updates[i] );
 		archives.push_back(new MPQArchive(path));
 	}
+	/*
+	 * looking at these files in the mpq editor, they look more like a update to re-pack into wow-update-base files
 	const char *updates2[] = { "13164", "13205", "13287", "13329", "13596", "13623" };
 	for (size_t i = 0; i < 6; i++) {
 		sprintf(path,"%swow-update-%s.MPQ",gamePath.c_str(),updates2[i]);
 		archives.push_back(new MPQArchive(path));
 	}
+	*/
 
 	OpenDBs();
 
