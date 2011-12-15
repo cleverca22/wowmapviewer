@@ -17,7 +17,12 @@ enum MAPID {
 Menu::Menu()
 {	
 	DBCFile f("DBFilesClient\\Map.dbc");
-	f.open();
+	if (!f.open()) {
+		gLog("error opening Map.dbc\n");
+		sel = -1;
+		bg = 0;
+		return;
+	}
 	int y=0;
 	int x=5;
 	
@@ -59,6 +64,27 @@ Menu::Menu()
 		
 		maps.push_back(e);
 
+	}
+	const char *extra_maps[] = { "TheHourOfTwilight" };
+	for (int i = 0; i < 1; i++) {
+		MapEntry e;
+		e.font = f16;
+		e.id = 1; // i think this only effects the sky right now
+		e.name = extra_maps[i];
+		e.x0 = x;
+		e.y0 = y;
+
+		e.y1 = e.y0 + 16;
+		y += 16;
+
+		if ((y + 25) >= video.yres) {
+			x += 160;
+			y = 0;
+		}
+
+		e.x1 = e.x0 + e.font->textwidth(e.name.c_str());
+
+		maps.push_back(e);
 	}
 
 	sel = -1;

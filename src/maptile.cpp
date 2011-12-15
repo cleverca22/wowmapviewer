@@ -808,7 +808,7 @@ Flag		Meaning
 0x40		MCCV chunk available
 0x8000		Unknown, but heavily used in TBC.
 */
-void MapChunk::initTextures(char *basename, int first, int last)
+void MapChunk::initTextures(const char *basename, int first, int last)
 {
 	char buf[256];
 	for (int i=first; i<=last; i++) {

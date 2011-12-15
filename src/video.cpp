@@ -47,7 +47,8 @@ Video::~Video()
 
 void Video::init(int xres, int yres, bool fullscreen)
 {
-	SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO);
+	int ret = SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO);
+	assert(ret == 0);
 	int flags = SDL_OPENGL | SDL_HWSURFACE | SDL_ANYFORMAT | SDL_DOUBLEBUF;
 	if (fullscreen) flags |= SDL_FULLSCREEN;
 	// 32 bits ffs
