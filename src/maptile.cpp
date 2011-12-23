@@ -4,6 +4,7 @@
 #include "shaders.h"
 #include <cassert>
 #include <algorithm>
+
 using namespace std;
 
 struct WaterTile
@@ -225,7 +226,7 @@ struct MH2O_Information {
 MapTile is ADT
 http://madx.dk/wowdev/wiki/index.php?title=ADT
 */
-MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), topnode(0,0,16), nWMO(0), nMDX(0)
+MapTile::MapTile(int x0, int z0, std::string basename, bool bigAlpha): x(x0), z(z0), topnode(0,0,16), nWMO(0), nMDX(0)
 {
 	xbase = x0 * TILESIZE;
 	zbase = z0 * TILESIZE;
@@ -246,30 +247,53 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 		fclose( exFile );
 	}
 */
-
-	MPQFile f(filename);
+	for (int fileindex = 0; fileindex < 3; fileindex++) {
+		char name[256];
+		bool mcnk_has_header = false;
+		switch (fileindex) {
+			case 0:
+				sprintf(name,"World\\Maps\\%s\\%s_%d_%d.adt", basename.c_str(), basename.c_str(), x0, z0);
+				mcnk_has_header = true;
+				break;
+			case 1:
+				sprintf(name,"World\\Maps\\%s\\%s_%d_%d_tex0.adt", basename.c_str(), basename.c_str(), x0, z0);
+				break;
+			/*case 2:
+				sprintf(name,"World\\Maps\\%s\\%s_%d_%d_tex1.adt", basename.c_str(), basename.c_str(), x0, z0);
+				break;*/
+			case 2:
+				sprintf(name,"World\\Maps\\%s\\%s_%d_%d_obj0.adt", basename.c_str(), basename.c_str(), x0, z0);
+				break;
+		}
+		gLog("%s\n",name);
+		parse_adt(name,mcnk_has_header);
+	}
+}
+void MapTile::parse_adt(char *name,bool mcnk_has_header) {
+	MPQFile f(name);
 	ok = !f.isEof();
 	if (!ok) {
-		gLog("Error: loading %s\n",filename);
+		gLog("Error: loading %s\n",name);
 		return;
 	}
 
 	char fourcc[5];
 	uint32 size;
 
-	size_t mcnk_offsets[CHUNKS_IN_TILE*CHUNKS_IN_TILE], mcnk_sizes[CHUNKS_IN_TILE*CHUNKS_IN_TILE];
+	__int32 mcnk_offsets[CHUNKS_IN_TILE*CHUNKS_IN_TILE], mcnk_sizes[CHUNKS_IN_TILE*CHUNKS_IN_TILE];
 	memset(mcnk_offsets, 0, sizeof(mcnk_offsets));
 	memset(mcnk_sizes, 0, sizeof(mcnk_sizes));
+	int mcnk_count = 0;
 
 	while (!f.isEof()) {
 		memset(fourcc, 0, 4);
-		size = 0;
 		f.read(fourcc,4);
 		f.read(&size, 4);
 
 		flipcc(fourcc);
 		fourcc[4] = 0;
 
+		gLog("FINDME %s %s %d\n",name,fourcc,size);
 		if (size == 0)
 			continue;
 
@@ -277,10 +301,14 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 		size_t nextpos = f.getPos() + size;
 
 		if (strncmp(fourcc, "MVER", 4) == 0) {
+			__int32 version;
+			f.read(&version,4);
+			printf("adt version %d\n",version);
 		}
 		else if (strncmp(fourcc, "MHDR", 4) == 0) {
 		}
 		else if (strncmp(fourcc,"MCIN",4)==0) {
+			printf("MCIN chunk!!!\n");
 			/*
 			Index for MCNK chunks. Contains 256 records of 16 bytes, which have the following format:
 			struct SMChunkInfo // 03-29-2005 By ObscuR
@@ -325,6 +353,7 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 					if (MPQFile::exists(texshader.c_str()))
 						texpath = texshader;
 				}
+				gLog("MTEX %s\n",texpath.c_str());
 
 				video.textures.add(texpath);
 				textures.push_back(texpath);
@@ -346,6 +375,7 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 				std::string path(p);
 				p+=strlen(p)+1;
 				fixname(path);
+				gLog("MMDX %s\n",path.c_str());
 
 				gWorld->modelmanager.add(path);
 				models.push_back(path);
@@ -372,6 +402,7 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 				std::string path(p);
 				p+=strlen(p)+1;
 				fixname(path);
+				gLog("MWMO %s\n",path.c_str());
 
 				gWorld->wmomanager.add(path);
 				wmos.push_back(path);
@@ -585,7 +616,7 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 					}
 					else if( mh2oi->ofsHeigthAlpha != 0 )
 					{
-						gLog("Unknown flag combination: %s.\n", filename);
+						gLog("Unknown flag combination: %s.\n", name);
 					}
 
 					chunks[i/CHUNKS_IN_TILE][i%CHUNKS_IN_TILE].waterLayer.push_back( waterLayer );
@@ -598,6 +629,9 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 		}
 		else if(strncmp(fourcc, "MCNK", 4) == 0) {
 			// MCNK data will be processed separately ^_^
+			mcnk_offsets[mcnk_count] = f.getPos() - 8;
+			mcnk_sizes[mcnk_count] = size;
+			mcnk_count++;
 		}
 		else if(strncmp(fourcc, "MFBO", 4) == 0) {
 			/*
@@ -628,10 +662,11 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 		else {
 			gLog("No implement tile chunk %s [%d].\n", fourcc, size);
 		}
-
+//gLog("test %d %d\n",f.getPos(),f.getSize());
 		f.seek((int)nextpos);
 	}
 
+	gLog("%d MCNK's found in %s\n",mcnk_count-1,name);
 	// read individual map chunks
 	for (size_t j=0; j<CHUNKS_IN_TILE; j++) {
 		for (size_t i=0; i<CHUNKS_IN_TILE; i++) {
@@ -639,7 +674,8 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 				continue;
 			}
 			f.seek((int)mcnk_offsets[j*16+i]);
-			chunks[j][i].init(this, f, mBigAlpha);
+			gLog("MCNK debug %d %d %d %x\n",mcnk_offsets[j*CHUNKS_IN_TILE+i],mcnk_sizes[j*CHUNKS_IN_TILE+i],f.getPos(),f.getPointer());
+			chunks[j][i].init(this, f, mBigAlpha,mcnk_has_header);
 		}
 	}
 
@@ -813,13 +849,14 @@ void MapChunk::initTextures(const char *basename, int first, int last)
 	char buf[256];
 	for (int i=first; i<=last; i++) {
 		sprintf(buf, "%s.%d.blp", basename, i);
+//		gLog("loading texture %d %s\n",i,buf);
 		wTextures.push_back(video.textures.add(buf));
 	}
 }
 
 static unsigned char blendbuf[64*64*4]; // make unstable when new/delete, just make it global
 static unsigned char amap[64*64];
-void MapChunk::init(MapTile* mt, MPQFile &f, bool bigAlpha)
+void MapChunk::init(MapTile* mt, MPQFile &f, bool bigAlpha, bool mcnk_has_header)
 {
 	Vec3D tn[mapbufsize], tv[mapbufsize];
 
@@ -832,6 +869,7 @@ void MapChunk::init(MapTile* mt, MPQFile &f, bool bigAlpha)
 	f.read(&size, 4);
 	flipcc(fcc);
 	fcc[4] = 0;
+	gLog("MapChunk::init %s %d\n",fcc,size);
 
 	if (strncmp(fcc, "MCNK", 4)!=0 || size == 0) {
 		gLog("Error: mcnk main chunk %s [%d].\n", fcc, size);
@@ -842,10 +880,16 @@ void MapChunk::init(MapTile* mt, MPQFile &f, bool bigAlpha)
 	mBigAlpha=bigAlpha;
 	
 	size_t lastpos = f.getPos() + size;
+	if (mcnk_has_header) {
+		if (size < 80) {
+			printf("err\n");
+			return;
+		}
 
 	//char header[0x80];
 	//MapChunkHeader header;
-	f.read(&header, 0x80);
+		f.read(&header, 0x80);
+	}
 
 	areaID = header.areaid;
 
@@ -855,6 +899,7 @@ void MapChunk::init(MapTile* mt, MPQFile &f, bool bigAlpha)
 
 	int holes = header.holes;
 	int chunkflags = header.flags;
+	gLog("chunkflags %x\n",chunkflags);
 
 	/*
 	0x4 		River
@@ -924,7 +969,7 @@ void MapChunk::init(MapTile* mt, MPQFile &f, bool bigAlpha)
 		flipcc(fcc);
 		fcc[4] = 0;
 
-		//gLog("fcc: %s, size: %d, pos: %d, size: %d.\n", fcc, size, f.getPos(), f.getSize());
+		gLog("fcc: %s, size: %d, pos: %d, size: %d.\n", fcc, size, f.getPos(), f.getSize());
 
 		if (size == 0) {
 			// MCAL always has wrong size....
@@ -1079,6 +1124,7 @@ void MapChunk::init(MapTile* mt, MPQFile &f, bool bigAlpha)
 			//gLog("=\n");
 			for (int i=0; i<nTextures; i++) {
 				f.read(&mcly[i], sizeof(struct MCLY));
+				gLog("MCLY %d %x %d\n",i,mcly[i].flags,mcly[i].textureId);
 
 				if (mcly[i].flags & 0x80) {
 					animated[i] = mcly[i].flags;
@@ -1457,6 +1503,7 @@ void MapChunk::init(MapTile* mt, MPQFile &f, bool bigAlpha)
 	glBindBufferARB(GL_ARRAY_BUFFER_ARB, minishadows);
 	glBufferDataARB(GL_ARRAY_BUFFER_ARB, mapbufsize*4*sizeof(float), ts, GL_STATIC_DRAW_ARB);
 #endif
+	if (vmin.x != 9999999) gLog("CHUNK %d,%d %f,%f,%f %f,%f,%f %f,%f,%f\n",mt->x,mt->z,vmin.x,vmin.y,vmin.z,vmax.x,vmax.y,vmax.z,header.xpos,header.ypos,header.zpos);
 }
 
 
@@ -1537,6 +1584,7 @@ void MapChunk::drawPass(int anim)
 void MapChunk::draw()
 {
 	if (!gWorld->frustum.intersects(vmin,vmax)) return;
+//	gLog("CHUNK2 %d,%d %d %f,%f,%f %f,%f,%f\n",mt->x,mt->z,nTextures,gWorld->camera.x,gWorld->camera.y,gWorld->camera.z,vcenter.x,vcenter.y,vcenter.z);
 	if (nTextures == 0) return;
 	float mydist = (gWorld->camera - vcenter).length() - r;
 	//if (mydist > gWorld->mapdrawdistance2) return;
@@ -1738,6 +1786,7 @@ void MapChunk::drawWater()
 	if( wTextures.size() == 0 )
 		return;
 
+
 	glActiveTextureARB(GL_TEXTURE1_ARB);
 	glDisable(GL_TEXTURE_2D);
 	glActiveTextureARB(GL_TEXTURE0_ARB);
@@ -1846,11 +1895,12 @@ void MapNode::draw()
 	if (!gWorld->frustum.intersects(vmin,vmax)) 
 		return;
 	for (int i=0; i<4; i++) 
-		children[i]->draw();
+		if (children[i]) children[i]->draw();
 }
 
 void MapNode::setup(MapTile *t)
 {
+	if (size == 16) gLog("MapNode::setup, %d %d size == %d\n",t->x,t->z,size);
 	vmin = Vec3D( 9999999.0f, 9999999.0f, 9999999.0f);
 	vmax = Vec3D(-9999999.0f,-9999999.0f,-9999999.0f);
 	mt = t;
@@ -1884,7 +1934,7 @@ void MapNode::cleanup()
 {
 	if (size>2) {
 		for (int i=0; i<4; i++) {
-			children[i]->cleanup();
+			if (children[i]) children[i]->cleanup();
 			delete children[i];
 		}
 	}

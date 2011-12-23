@@ -155,9 +155,10 @@ public:
 		for(int i=0; i<3; i++) {
 			alphamaps[i] = 0;
 		}
+		memset(&header,0,sizeof(header));
 	}
 
-	void init(MapTile* mt, MPQFile &f, bool bigAlpha);
+	void init(MapTile* mt, MPQFile &f, bool bigAlpha,bool mcnk_has_header);
 	void destroy();
 	void initStrip(int holes);
 
@@ -191,7 +192,7 @@ public:
 
 	MapNode topnode;
 
-	MapTile(int x0, int z0, char* filename, bool bigAlpha);
+	MapTile(int x0, int z0, std::string filename, bool bigAlpha);
 	~MapTile();
 
 	void draw();
@@ -200,6 +201,7 @@ public:
 	void drawSky();
 	//void drawPortals();
 	void drawModels();
+	void parse_adt(char *,bool);
 
 	/// Get chunk for sub offset x,z
 	MapChunk *getChunk(unsigned int x, unsigned int z);
