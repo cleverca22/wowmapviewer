@@ -152,6 +152,10 @@ public:
 		}
 		throw NotFound( );
 	}
+	int getRecordSize() { return recordSize; }
+	int getRecordCount() { return recordCount; }
+	int getFieldCount() { return fieldCount; }
+	int getStringSize() { return stringSize; }
 private:
 	std::string filename;
 	size_t recordSize;
