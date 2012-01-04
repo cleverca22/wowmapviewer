@@ -250,26 +250,33 @@ MapTile::MapTile(int x0, int z0, std::string basename, bool bigAlpha): x(x0), z(
 	for (int fileindex = 0; fileindex < 3; fileindex++) {
 		char name[256];
 		bool mcnk_has_header = false;
+		load_phases phase; // FIXME
 		switch (fileindex) {
 			case 0:
+				phase = main_file;
 				sprintf(name,"World\\Maps\\%s\\%s_%d_%d.adt", basename.c_str(), basename.c_str(), x0, z0);
 				mcnk_has_header = true;
 				break;
 			case 1:
+				phase = tex;
 				sprintf(name,"World\\Maps\\%s\\%s_%d_%d_tex0.adt", basename.c_str(), basename.c_str(), x0, z0);
 				break;
 			/*case 2:
 				sprintf(name,"World\\Maps\\%s\\%s_%d_%d_tex1.adt", basename.c_str(), basename.c_str(), x0, z0);
 				break;*/
 			case 2:
+				phase = obj;
 				sprintf(name,"World\\Maps\\%s\\%s_%d_%d_obj0.adt", basename.c_str(), basename.c_str(), x0, z0);
 				break;
 		}
 		gLog("%s\n",name);
-		parse_adt(name,mcnk_has_header);
+		parse_adt(name,mcnk_has_header,phase);
 	}
+	
+	// init quadtree
+	topnode.setup(this);
 }
-void MapTile::parse_adt(char *name,bool mcnk_has_header) {
+void MapTile::parse_adt(char *name,bool mcnk_has_header,load_phases phase) {
 	MPQFile f(name);
 	ok = !f.isEof();
 	if (!ok) {
@@ -674,13 +681,10 @@ void MapTile::parse_adt(char *name,bool mcnk_has_header) {
 				continue;
 			}
 			f.seek((int)mcnk_offsets[j*16+i]);
-			gLog("MCNK debug %d %d %d %x\n",mcnk_offsets[j*CHUNKS_IN_TILE+i],mcnk_sizes[j*CHUNKS_IN_TILE+i],f.getPos(),f.getPointer());
-			chunks[j][i].init(this, f, mBigAlpha,mcnk_has_header);
+			gLog("MCNK debug %s %f %f %d %d %d %d %d %x\n",name,xbase,zbase,j,i,mcnk_offsets[j*CHUNKS_IN_TILE+i],mcnk_sizes[j*CHUNKS_IN_TILE+i],f.getPos(),f.getPointer());
+			chunks[j][i].init(this, f, mBigAlpha,mcnk_has_header,j,i,phase);
 		}
 	}
-
-	// init quadtree
-	topnode.setup(this);
 
 	f.close();
 }
@@ -856,7 +860,7 @@ void MapChunk::initTextures(const char *basename, int first, int last)
 
 static unsigned char blendbuf[64*64*4]; // make unstable when new/delete, just make it global
 static unsigned char amap[64*64];
-void MapChunk::init(MapTile* mt, MPQFile &f, bool bigAlpha, bool mcnk_has_header)
+void MapChunk::init(MapTile* mt, MPQFile &f, bool bigAlpha, bool mcnk_has_header, bool debug,int chunkx,int chunky,load_phases phase)
 {
 	Vec3D tn[mapbufsize], tv[mapbufsize];
 
@@ -899,7 +903,6 @@ void MapChunk::init(MapTile* mt, MPQFile &f, bool bigAlpha, bool mcnk_has_header
 
 	int holes = header.holes;
 	int chunkflags = header.flags;
-	gLog("chunkflags %x\n",chunkflags);
 
 	/*
 	0x4 		River
@@ -952,8 +955,8 @@ void MapChunk::init(MapTile* mt, MPQFile &f, bool bigAlpha, bool mcnk_has_header
 	zbase = zbase*-1.0f + ZEROPOINT;
 	xbase = xbase*-1.0f + ZEROPOINT;
 
-	vmin = Vec3D( 9999999.0f, 9999999.0f, 9999999.0f);
-	vmax = Vec3D(-9999999.0f,-9999999.0f,-9999999.0f);
+	//vmin = Vec3D( 9999999.0f, 9999999.0f, 9999999.0f);
+	//vmax = Vec3D(-9999999.0f,-9999999.0f,-9999999.0f);
 
 	//unsigned char *blendbuf;
 	if (supportShaders) {
@@ -969,7 +972,7 @@ void MapChunk::init(MapTile* mt, MPQFile &f, bool bigAlpha, bool mcnk_has_header
 		flipcc(fcc);
 		fcc[4] = 0;
 
-		gLog("fcc: %s, size: %d, pos: %d, size: %d.\n", fcc, size, f.getPos(), f.getSize());
+		gLog("%d fcc: %s, size: %d, pos: %d, size: %d.\n", phase,fcc, size, f.getPos(), f.getSize());
 
 		if (size == 0) {
 			// MCAL always has wrong size....
@@ -1077,7 +1080,7 @@ void MapChunk::init(MapTile* mt, MPQFile &f, bool bigAlpha, bool mcnk_has_header
 			*/
 			nextpos = f.getPos() + 0x1C0; // size fix
 			// normal vectors
-			char nor[3];
+			signed char nor[3];
 			Vec3D *ttn = tn;
 			for (int j=0; j<17; j++) {
 				for (int i=0; i<((j%2)?8:9); i++) {
@@ -1404,15 +1407,27 @@ void MapChunk::init(MapTile* mt, MPQFile &f, bool bigAlpha, bool mcnk_has_header
 		f.seek((int)nextpos);
 	}
 
-	// create vertex buffers
-	glGenBuffersARB(1,&vertices);
-	glGenBuffersARB(1,&normals);
+	if (0) {
+		if (mt->textures.size()) {
+			string texture = mt->textures[0];
+			gLog("hacking nTextures %s\n",texture.c_str());
+			nTextures = 1;
+			animated[0] = 0;
+			textures[0] = video.textures.get(texture);
+		}
+	}
 
-	glBindBufferARB(GL_ARRAY_BUFFER_ARB, vertices);
-	glBufferDataARB(GL_ARRAY_BUFFER_ARB, mapbufsize*3*sizeof(float), tv, GL_STATIC_DRAW_ARB);
+	if (phase == main_file) {
+		// create vertex buffers
+		glGenBuffersARB(1,&vertices);
+		glGenBuffersARB(1,&normals);
 
-	glBindBufferARB(GL_ARRAY_BUFFER_ARB, normals);
-	glBufferDataARB(GL_ARRAY_BUFFER_ARB, mapbufsize*3*sizeof(float), tn, GL_STATIC_DRAW_ARB);
+		glBindBufferARB(GL_ARRAY_BUFFER_ARB, vertices);
+		glBufferDataARB(GL_ARRAY_BUFFER_ARB, mapbufsize*3*sizeof(float), tv, GL_STATIC_DRAW_ARB);
+
+		glBindBufferARB(GL_ARRAY_BUFFER_ARB, normals);
+		glBufferDataARB(GL_ARRAY_BUFFER_ARB, mapbufsize*3*sizeof(float), tn, GL_STATIC_DRAW_ARB);
+	}
 
 	if (hasholes)
 		initStrip(holes);
@@ -1427,6 +1442,7 @@ void MapChunk::init(MapTile* mt, MPQFile &f, bool bigAlpha, bool mcnk_has_header
 
 	vcenter = (vmin + vmax) * 0.5f;
 
+	if (phase == main_file) {
 	if (supportShaders) {
 		glGenTextures(1, &blend);
 		glBindTexture(GL_TEXTURE_2D, blend);
@@ -1436,6 +1452,7 @@ void MapChunk::init(MapTile* mt, MPQFile &f, bool bigAlpha, bool mcnk_has_header
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		//delete[] blendbuf;
+	}
 	}
 
 #if 0
@@ -1503,7 +1520,7 @@ void MapChunk::init(MapTile* mt, MPQFile &f, bool bigAlpha, bool mcnk_has_header
 	glBindBufferARB(GL_ARRAY_BUFFER_ARB, minishadows);
 	glBufferDataARB(GL_ARRAY_BUFFER_ARB, mapbufsize*4*sizeof(float), ts, GL_STATIC_DRAW_ARB);
 #endif
-	if (vmin.x != 9999999) gLog("CHUNK %d,%d %f,%f,%f %f,%f,%f %f,%f,%f\n",mt->x,mt->z,vmin.x,vmin.y,vmin.z,vmax.x,vmax.y,vmax.z,header.xpos,header.ypos,header.zpos);
+	if (vmin.x != 9999999) gLog("CHUNK %d,%d maptile: %d,%d vmin: %f,%f,%f\tvmax: %f,%f,%f\tbase: %f,%f,%f\n",chunkx,chunky, mt->x,mt->z, vmin.x,vmin.y,vmin.z, vmax.x,vmax.y,vmax.z, xbase,ybase,zbase);
 }
 
 
@@ -1900,7 +1917,6 @@ void MapNode::draw()
 
 void MapNode::setup(MapTile *t)
 {
-	if (size == 16) gLog("MapNode::setup, %d %d size == %d\n",t->x,t->z,size);
 	vmin = Vec3D( 9999999.0f, 9999999.0f, 9999999.0f);
 	vmax = Vec3D(-9999999.0f,-9999999.0f,-9999999.0f);
 	mt = t;

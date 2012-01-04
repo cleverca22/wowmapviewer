@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
 	int xres = 1024;
 	int yres = 768;
 
-	bool usePatch = false;
+	bool usePatch = true;
 
 	for (int i=1; i<argc; i++) {
 		if (!strcmp(argv[i],"-gamepath")) {
@@ -152,6 +152,10 @@ int main(int argc, char *argv[])
 	}
 	gLog("Locale: %s\n", locales[langID]);
 
+	sprintf(path,"%sCache/%s/patch-enUS-14946.MPQ",gamePath.c_str(),locales[langID]);
+	gLog("test %s\n",path);
+	archives.push_back(new MPQArchive(path));
+
 	if (usePatch) {
 		// patch goes first -> fake priority handling
 		sprintf(path, "%s%s", gamePath.c_str(), "patch-3.MPQ");
@@ -170,8 +174,8 @@ int main(int argc, char *argv[])
 		archives.push_back(new MPQArchive(path));
 	}
 
-	const char* archiveNames[] = {"expansion3.MPQ", "expansion2.MPQ", "expansion1.MPQ", "world.MPQ", "sound.MPQ", "art.MPQ"};
-	for (size_t i=0; i<6; i++) {
+	const char* archiveNames[] = {"expansion3.MPQ", "expansion2.MPQ", "expansion1.MPQ", "world.MPQ", "sound.MPQ", "art.MPQ","common.MPQ","common-2.MPQ","expansion.MPQ"};
+	for (size_t i=0; i<9; i++) {
 		sprintf(path, "%s%s", gamePath.c_str(), archiveNames[i]);
 		archives.push_back(new MPQArchive(path));
 	}

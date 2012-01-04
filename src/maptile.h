@@ -95,6 +95,8 @@ public:
 	{
 		for(int i=0; i<4; i++)
 			children[i] = 0;
+		vmin = Vec3D( 9999999.0f, 9999999.0f, 9999999.0f);
+		vmax = Vec3D(-9999999.0f,-9999999.0f,-9999999.0f);
 	}
 
 	int px, py, size;
@@ -108,6 +110,11 @@ public:
 	void setup(MapTile *t);
 	void cleanup();
 
+};
+enum load_phases {
+	main_file,
+	tex,
+	obj
 };
 
 class MapChunk : public MapNode {
@@ -158,7 +165,7 @@ public:
 		memset(&header,0,sizeof(header));
 	}
 
-	void init(MapTile* mt, MPQFile &f, bool bigAlpha,bool mcnk_has_header);
+	void init(MapTile* mt, MPQFile &f, bool bigAlpha,bool mcnk_has_header,int chunkx,int chunky,load_phases);
 	void destroy();
 	void initStrip(int holes);
 
@@ -201,7 +208,7 @@ public:
 	void drawSky();
 	//void drawPortals();
 	void drawModels();
-	void parse_adt(char *,bool);
+	void parse_adt(char *,bool,load_phases);
 
 	/// Get chunk for sub offset x,z
 	MapChunk *getChunk(unsigned int x, unsigned int z);

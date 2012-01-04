@@ -17,6 +17,7 @@ bool glogfirst = true;
 
 void check_stuff() {
      assert(sizeof(__int16) == 2);
+     assert(sizeof(__int32) == 4);
 }
 void gLog(const char *str, ...)
 {
@@ -33,6 +34,10 @@ void gLog(const char *str, ...)
 	va_start (ap, str);
 	vfprintf (flog, str, ap);
 	va_end (ap);
+
+	va_start (ap,str);
+	vprintf(str,ap);
+	va_end(ap);
 
 	fclose(flog);
 };
