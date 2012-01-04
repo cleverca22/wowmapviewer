@@ -860,7 +860,7 @@ void MapChunk::initTextures(const char *basename, int first, int last)
 
 static unsigned char blendbuf[64*64*4]; // make unstable when new/delete, just make it global
 static unsigned char amap[64*64];
-void MapChunk::init(MapTile* mt, MPQFile &f, bool bigAlpha, bool mcnk_has_header, bool debug,int chunkx,int chunky,load_phases phase)
+void MapChunk::init(MapTile* mt, MPQFile &f, bool bigAlpha, bool mcnk_has_header, int chunkx,int chunky,load_phases phase)
 {
 	Vec3D tn[mapbufsize], tv[mapbufsize];
 
