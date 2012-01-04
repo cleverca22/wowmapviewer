@@ -1,8 +1,8 @@
 #ifndef VIDEO_H
 #define VIDEO_H
 
-#include <SDL.h>
-#include <SDL_opengl.h>
+#include <SDL/SDL.h>
+#include <SDL/SDL_opengl.h>
 #include <map>
 
 #ifndef _WINDOWS

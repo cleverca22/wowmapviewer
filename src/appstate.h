@@ -1,7 +1,7 @@
 #ifndef APPSTATE_H
 #define APPSTATE_H
 
-#include <SDL.h>
+#include <SDL/SDL.h>
 #include <vector>
 
 class AppState {

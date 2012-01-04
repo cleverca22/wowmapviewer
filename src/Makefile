@@ -23,6 +23,6 @@ zlib/zlib.a:
 mpq_stormlib.o: mpq_stormlib.h util.h wowmapview.h appstate.h font.h
 wowmapview.o: util.h mpq.h mpq_stormlib.h video.h vec3d.h manager.h font.h ddslib.h appstate.h test.h world.h wowmapview.h maptile.h wmo.h model.h modelheaders.h quaternion.h matrix.h animated.h defines.h particle.h liquid.h frustum.h sky.h dbcfile.h menu.h areadb.h
 %.o:%.cpp
-	$(CC) -c $< -ISDL/include/ -D_LINUX
+	$(CC) -c $< -D_LINUX -g
 dbclister: dbclister.o dbcfile.o mpq_stormlib.o util.o stormlib/libStorm.a
 	$(CC) -o $@ $+ -lbz2
