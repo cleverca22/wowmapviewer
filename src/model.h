@@ -236,7 +236,7 @@ public:
 	Vec3D ldir;
 	Vec4D lcol;
 
-	ModelInstance() {}
+	ModelInstance() { model = 0; }
 	ModelInstance(Model *m, MPQFile &f);
     void init2(Model *m, MPQFile &f);
 	void draw();
