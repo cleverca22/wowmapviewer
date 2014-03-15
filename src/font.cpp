@@ -54,28 +54,27 @@ Font::~Font()
 {
 }
 
-void Font::drawchar(int x, int y, const char ch)
+void Font::drawchar(uint16_t x, uint16_t y, const char ch)
 {
 	if (ch==32) return;
-
+	
 	charinfo *c = &chars[ch];
-
-    glBegin(GL_QUADS);
-
+	
+	glBegin(GL_QUADS);
+	
 	glTexCoord2f(c->tx1,c->ty1);
-	glVertex2f((float)x, (float)y);
-
+	glVertex2s(x, y);
+	
 	glTexCoord2f(c->tx2,c->ty1);
-	glVertex2f((float)(x+c->w), (float)y);
-
+	glVertex2s(x+c->w, y);
+	
 	glTexCoord2f(c->tx2,c->ty2);
-	glVertex2f((float)(x+c->w), (float)(y+c->h));
-
+	glVertex2s(x+c->w, y+c->h);
+	
 	glTexCoord2f(c->tx1,c->ty2);
-	glVertex2f((float)x, (float)(y+c->h));
-
+	glVertex2s(x, y+c->h);
+	
 	glEnd();
-
 }
 
 // ASSUME: ortho mode

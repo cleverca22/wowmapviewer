@@ -2,8 +2,7 @@
 #ifndef FONT_H
 #define FONT_H
 
-class Font;
-
+#include <stdint.h>
 
 struct charinfo {
 	int baseline;
@@ -34,7 +33,7 @@ public:
 	void shprint(int x, int y, const char *str, ...);
 
 protected:
-	void drawchar(int x, int y, const char ch);
+	void drawchar(uint16_t x, uint16_t y, const char ch);
 
 };
 
