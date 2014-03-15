@@ -124,9 +124,9 @@ int main(int argc, char *argv[])
 	} else getGamePath();
 
 	char path[512];
-	const char *test_files[] = { "common.MPQ", "art.MPQ" };
+	const char *test_files[] = { "common.MPQ", "art.MPQ", "sound.MPQ" };
 	bool path_valid = false;
-	for (int i = 0; i < 2; i++) {
+	for (int i = 0; i < 3; i++) {
       sprintf(path,"%s%s",gamePath.c_str(),test_files[i]);
 	    if (file_exists(path)) path_valid = true;
     }
@@ -174,8 +174,8 @@ int main(int argc, char *argv[])
 		archives.push_back(new MPQArchive(path));
 	}
 
-	const char* archiveNames[] = {"expansion3.MPQ", "expansion2.MPQ", "expansion1.MPQ", "world.MPQ", "sound.MPQ", "art.MPQ","common.MPQ","common-2.MPQ","expansion.MPQ"};
-	for (size_t i=0; i<9; i++) {
+	const char* archiveNames[] = {"expansion3.MPQ", "expansion2.MPQ", "expansion1.MPQ", "world.MPQ", "sound.MPQ", "art.MPQ","common.MPQ","common-2.MPQ","expansion.MPQ","texture.MPQ","itemtexture.MPQ","misc.MPQ"};
+	for (size_t i=0; i<12; i++) {
 		sprintf(path, "%s%s", gamePath.c_str(), archiveNames[i]);
 		archives.push_back(new MPQArchive(path));
 	}

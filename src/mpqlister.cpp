@@ -1,5 +1,7 @@
 #include <iostream>
 #include "mpq_stormlib.h"
+
+// g++ mpqlister.cpp -o mpqlister mpq_stormlib.cpp util.cpp stormlib/libStorm.a -lbz2
 using namespace std;
 
 int main(int argc, char *argv[]) {

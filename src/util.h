@@ -10,6 +10,9 @@
 #ifdef _WINDOWS
 #include <io.h>
 #endif
+
+#include "defines.h"
+
 using namespace std;
 
 extern std::string gamePath;
