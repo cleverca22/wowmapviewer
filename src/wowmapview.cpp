@@ -67,6 +67,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 int main(int argc, char *argv[])
 {
+	int prints = 0;
 	const char *override_game_path = NULL;
 	srand((unsigned int)time(0));
 	check_stuff();
@@ -124,9 +125,9 @@ int main(int argc, char *argv[])
 	} else getGamePath();
 
 	char path[512];
-	const char *test_files[] = { "common.MPQ", "art.MPQ" };
+	const char *test_files[] = { "common.MPQ", "art.MPQ", "sound.MPQ" };
 	bool path_valid = false;
-	for (int i = 0; i < 2; i++) {
+	for (int i = 0; i < 3; i++) {
       sprintf(path,"%s%s",gamePath.c_str(),test_files[i]);
 	    if (file_exists(path)) path_valid = true;
     }
@@ -201,11 +202,11 @@ int main(int argc, char *argv[])
 	printf("patch status %d\n",ret);
 	*/
 	const char *updates[] = { "13914", "14007", "14333", "14480", "14545", "14946", "15005", "15050" };
-	for (size_t i = 0; i < 8; i++) {
+	for (size_t i = 0; i < 0; i++) {
 		sprintf(path, "%swow-update-base-%s.MPQ",gamePath.c_str(),updates[i]);
 		archives.push_back(new MPQArchive(path));
 	}
-	for (size_t i = 0; i < 8; i++) {
+	for (size_t i = 0; i < 0; i++) {
 		sprintf(path, "%s%s/wow-update-enUS-%s.MPQ", gamePath.c_str(),locales[langID],updates[i] );
 		archives.push_back(new MPQArchive(path));
 	}
@@ -232,8 +233,8 @@ int main(int argc, char *argv[])
 		if (!supportMultiTex) gLog("GL_ARB_multitexture\n");
 #ifdef _WIN32
 		MessageBox(0, msg, 0, MB_OK|MB_ICONEXCLAMATION);
-		exit(1);
 #endif
+		exit(1);
 	}
 
 	initFonts();
@@ -282,6 +283,7 @@ int main(int argc, char *argv[])
 		as->tick(ftime, dt/1000.0f);
 
 		as->display(ftime, dt/1000.0f);
+		glFlush();
 
 		if (gPop) {
 			gPop = false;
@@ -293,23 +295,28 @@ int main(int argc, char *argv[])
 		fcount++;
 		ft += dt;
 		if (ft >= 1000) {
-            float fps = (float)fcount / (float)ft * 1000.0f;
+			float fps = (float)fcount / (float)ft * 1000.0f;
 			gFPS = fps;
 			char buf[32];
 			sprintf(buf, APP_TITLE " - %.2f fps",fps);
+			puts(buf);
 			SDL_WM_SetCaption(buf,NULL);
-            ft = 0;
+			ft = 0;
 			fcount = 0;
 
 			if (fps > 40) fps_delay += 1000;
 			if (fps < 30) fps_delay -= 2000;
 			if (fps_delay < 0) fps_delay = 0;
+			prints++;
+			//if (prints > 100) done = true;
 		}
+		//if (frames > 1000) done = true;
 
 		video.flip();
 		if (fps_delay) usleep(fps_delay);
 	}
 
+	delete m;
 
 	deleteFonts();
 	
