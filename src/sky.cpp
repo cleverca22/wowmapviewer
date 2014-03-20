@@ -28,7 +28,7 @@ Sky::Sky( DBCFile::Iterator data )
 
 	int FirstId = data->getInt( LightDB::DataIDs ) * 18;
 
-	for( int i = 0; i < 18; i++ ) 
+	/*for( int i = 0; i < 18; i++ ) 
 	{
 		try {
 			DBCFile::Record rec = gLightIntBandDB.getByID( FirstId + i );
@@ -47,7 +47,7 @@ Sky::Sky( DBCFile::Iterator data )
 			}
 		} catch (LightIntBandDB::NotFound) {
 		}
-	}
+	}*/
 }
 
 Vec3D Sky::colorFor(int r, int t) const

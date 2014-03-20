@@ -60,8 +60,9 @@ void Font::drawchar(uint16_t x, uint16_t y, const char ch)
 	
 	charinfo *c = &chars[ch];
 	
-	glBegin(GL_QUADS);
-	
+	glBegin(GL_TRIANGLES);
+
+	// triangle 1
 	glTexCoord2f(c->tx1,c->ty1);
 	glVertex2s(x, y);
 	
@@ -71,8 +72,15 @@ void Font::drawchar(uint16_t x, uint16_t y, const char ch)
 	glTexCoord2f(c->tx2,c->ty2);
 	glVertex2s(x+c->w, y+c->h);
 	
+	// triangle 2
+	glTexCoord2f(c->tx2,c->ty2);
+	glVertex2s(x+c->w, y+c->h);
+	
 	glTexCoord2f(c->tx1,c->ty2);
 	glVertex2s(x, y+c->h);
+
+	glTexCoord2f(c->tx1,c->ty1);
+	glVertex2s(x, y);
 	
 	glEnd();
 }
