@@ -294,11 +294,11 @@ int main(int argc, char *argv[])
 		frames++;
 		fcount++;
 		ft += dt;
-		if (ft >= 1000) {
+		if (ft >= 10000) {
 			float fps = (float)fcount / (float)ft * 1000.0f;
 			gFPS = fps;
 			char buf[32];
-			sprintf(buf, APP_TITLE " - %.2f fps",fps);
+			sprintf(buf, APP_TITLE " - %.2f fps %d",fps,fps_delay);
 			puts(buf);
 			SDL_WM_SetCaption(buf,NULL);
 			ft = 0;
