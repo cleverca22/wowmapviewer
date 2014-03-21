@@ -174,8 +174,8 @@ int main(int argc, char *argv[])
 		archives.push_back(new MPQArchive(path));
 	}
 
-	const char* archiveNames[] = {"expansion3.MPQ", "expansion2.MPQ", "expansion1.MPQ", "world.MPQ", "sound.MPQ", "art.MPQ","common.MPQ","common-2.MPQ","expansion.MPQ","texture.MPQ","itemtexture.MPQ","misc.MPQ"};
-	for (size_t i=0; i<12; i++) {
+	const char* archiveNames[] = {"expansion3.MPQ", "expansion2.MPQ", "expansion1.MPQ", "world.MPQ", "sound.MPQ", "art.MPQ","common.MPQ","common-2.MPQ","expansion.MPQ","texture.MPQ","itemtexture.MPQ","misc.MPQ", "model.MPQ" };
+	for (size_t i=0; i<13; i++) {
 		sprintf(path, "%s%s", gamePath.c_str(), archiveNames[i]);
 		archives.push_back(new MPQArchive(path));
 	}
